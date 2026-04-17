@@ -1,0 +1,91 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores y entornos de desarrollo
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Bases de datos
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+*.mdb
+*.accdb
+
+# Archivos de datos
+*.csv
+*.xlsx
+*.xls
+*.json
+data/
+datos/
+*.json
+
+# Backups de bases de datos
+*.bak
+*.backup
+*.sql
+*.dump
+
+# Bases de datos locales
+database/
+db/
+databases/
+storage/*.db
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Archivos de construcción (build)
+dist/
+build/
+out/
+*.min.js
+*.min.css
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Configuración de cobertura de código
+coverage/
+.nyc_output/
+
+# Archivos de caché
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Archivos de compilación (TypeScript, etc.)
+*.tsbuildinfo
+
+# Extensiones opcionales (si usas bundlers)
+*.map
+
+# Archivos de configuración local
+config.local.js
+config.local.css
