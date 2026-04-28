@@ -1,0 +1,33 @@
+:root {
+    --azul-uner: #0056b3;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Color principal de Bootstrap sobrescrito */
+.bg-primary { background-color: var(--azul-uner) !important; }
+.text-primary { color: var(--azul-uner) !important; }
+.btn-primary { background-color: var(--azul-uner) !important; border-color: var(--azul-uner) !important; }
+.btn-outline-primary { color: var(--azul-uner) !important; border-color: var(--azul-uner) !important; }
+
+/* Estilos para el Menú Lateral */
+.sidebar .nav-link {
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* Efectos de tarjetas */
+.card {
+    transition: transform 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
