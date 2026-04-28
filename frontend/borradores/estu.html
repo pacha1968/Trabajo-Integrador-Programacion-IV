@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGA - Gestion Academica UNER</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header><h1>Sistema Gestion Cursos</h1></header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="cursos.html">Cursos</a></li>
+            <li><a href="estudiantes.html"class="active">Estudiantes</a></li>
+            <li><a href="inscripciones.html">Inscripciones</a></li>
+        </ul>
+    </nav>
+    <main>
+        <header>
+            <h2>Listado de Estudiantes</h2>
+            <a href="nuevo_estudiante.html"><button class="btn-nuevo">+ Nuevo Estudiante</button></a>
+        </header>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Documento</th>
+                        <th>Apellido</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>4545454</td>
+                        <td>De la Cruz</td>
+                        <td>Juan</td>
+                        <td>juandela@gmail.com</td>
+                        <td>
+                            <button class="btn-edit">Editar</button>
+                            <button class="btn-borrar">Borrar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

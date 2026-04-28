@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGA - Gestion Academica UNER</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema Gestion Cursos</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="cursos.html" class="active">Cursos</a></li>
+            <li><a href="estudiantes.html">Estudiantes</a></li>
+            <li><a href="inscripciones.html">Inscripciones</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="main-header-container">
+            <h2>Nueva Inscripcion Manual</h2>
+            <a href="inscripciones.html" class="btn-volver">Volver al Listado</a>
+        </div>
+
+        <section class="form-container">
+            <form id="formNuevaInscripcion">
+                <div class="form-group">
+                    <label>Seleccionar Alumno:</label>
+                    <select name="alumno_id" required>
+                        <option value="">--Seleccione un alumno--</option>
+                        <option value="1">Luis Suarez</option>
+                        <option value="2">Juan De La Cruz</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Seleccionar Curso:</label>
+                    <select name="curso_id" required>
+                        <option value="">Seleccione un Curso</option>
+                        <option value="101">Programacion Orientada a Objetos</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Fecha de Inscripcion:</label>
+                    <input type="date" name="fecha_incripcion" required>
+                </div>
+
+                <button type="submit" class="btn-guardar">Registrar Inscripcion</button>
+            </form>
+        </section>
+
+    </main>
+</body>
+</html>

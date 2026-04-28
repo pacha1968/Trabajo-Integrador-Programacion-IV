@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGA - Gestion Academica UNER</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Sistema Gestion Cursos</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="cursos.html" class="active">Cursos</a></li>
+            <li><a href="estudiantes.html">Estudiantes</a></li>
+            <li><a href="inscripciones.html">Inscripciones</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="main-header-container">
+            <h2>Cargar Nuevo Curso</h2>
+            <a href="cursos.html" class="btn-volver">Volver al Listado</a>
+        </div>
+
+        <section class="form-container">
+            <form>
+                <div class="form-group">
+                    <label>Nombre del Curso:</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>Descripcion:</label>
+                    <textarea name="Descripcion" id="descripcion" rows="4" placeholder="De que trata el curso..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Cupo:</label>
+                    <input type="text">
+                </div>
+                <button type="submit" class="btn-guardar">Guardar Nuevo Curso</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

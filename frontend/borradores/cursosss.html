@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGA - Gestion Academica UNER</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header><h1>Sistema Gestion Cursos</h1></header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="cursos.html"class="active">Cursos</a></li>
+            <li><a href="estudiantes.html">Estudiantes</a></li>
+            <li><a href="inscripciones.html">Inscripciones</a></li>
+        </ul>
+    </nav>
+    <main>
+        <header>
+            <h2>Listado de Cursos</h2>
+            <a href="nuevo_curso.html"><button class="btn-nuevo">+ Nuevo Curso</button></a>
+        </header>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre del Curso</th>
+                        <th>Descripcion</th>
+                        <th>Cupo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>POO</td>
+                        <td>Programacion Orientada a Objetos</td>
+                        <td>80</td>
+                        <td>Abierto</td>
+                        <td>
+                            <button class="btn-edit">Editar</button>
+                            <button class="btn-borrar">Borrar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>
