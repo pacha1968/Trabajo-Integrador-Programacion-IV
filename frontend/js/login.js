@@ -16,8 +16,12 @@ const form = document.querySelector('form');
 
                 const data = await response.json();
 
-                if (data.success) {
-                    alert("¡Bienvenido al sistema!");
+               if (data.success) {
+                    // Guardamos el token y el nombre para usarlos en todo el sitio
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userName', `${data.user.nombre} ${data.user.apellido}`);
+                    
+                    alert(`¡Bienvenido, ${data.user.nombre}!`);
                     window.location.href = 'index.html';
                 } else {
                 // Si existe el mensaje lo muestra, sino muestra el error del catch
