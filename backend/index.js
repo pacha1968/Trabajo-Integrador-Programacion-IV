@@ -66,6 +66,21 @@ app.get('/api/cursos', async (req, res) => {
   }
 });
 
+app.get('/api/stats', async (req, res) => {
+    try {
+        // Contamos alumnos activos y cursos que no estén eliminados (Soft Delete)
+        const estudiantes = await pool.query('SELECT COUNT(*) FROM estudiantes WHERE activo = 1');
+        const cursos = await pool.query('SELECT COUNT(*) FROM cursos WHERE id_curso_estado != 4');
+        
+        res.json({
+            totalEstudiantes: estudiantes.rows[0].count,
+            totalCursos: cursos.rows[0].count
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Un solo app.listen al final de todo
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
