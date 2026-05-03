@@ -14,6 +14,7 @@ const pool = new Pool({
   port: 5432,
 });
 
+// Ruta de Login
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -32,8 +33,19 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Ruta de Cursos
+app.get('/api/cursos', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM cursos');
+    res.json(result.rows);
+  } catch(err) {
+    console.error('Error al consultar los cursos', err);
+    res.status(500).json({ success: false, message: 'Error del servidor' });
+  }
+});
+
+// Un solo app.listen al final de todo
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
