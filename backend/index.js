@@ -81,6 +81,68 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
+// Ruta POST para crear un nuevo curso
+app.post('/api/cursos', async (req, res) => {
+  // Extraemos los datos que envía el frontend
+  const {nombre, cupo, descripcion, fechaInicio, cantidadHoras } = req.body;
+  
+  if (!nombre || nombre.trim() === '' || !isNaN(nombre.trim())) {
+      return res.status(400).json({ success: false, message: 'El nombre del curso es inválido o son solo números.' });
+  }
+
+  if (cantidadHoras <= 0 || cupo <= 0) {
+      return res.status(400).json({ success: false, message: 'Las horas y los cupos deben ser números positivos.' });
+  }
+
+  const hoy = new Date();
+  hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+  const fechaHoyFormateada = hoy.toISOString().split('T')[0];
+
+  if (fechaInicio < fechaHoyFormateada) {
+      return res.status(400).json({ success: false, message: 'La fecha de inicio no puede ser en el pasado.' });
+  }
+
+  try {
+    // Armamos la consulta SQL (Usamos $1, $2 para evitar inyecciones SQL)
+    // Asumimos que id_curso_estado = 1 significa "Activo" (ajustalo si usas otro ID)
+    const query = `
+      INSERT INTO cursos 
+      (nombre, descripcion, fecha_inicio, cantidad_horas, inscriptos_max, id_curso_estado, id_usuario_modificacion, fecha_hora_modificacion) 
+      VALUES ($1, $2, $3, $4, $5, 1, 1, CURRENT_TIMESTAMP(0)) 
+      RETURNING *
+    `;
+    const values = [nombre, descripcion, fechaInicio, cantidadHoras, cupo]; 
+
+    // Ejecutamos la consulta
+    const result = await pool.query(query, values);
+    
+    // Devolvemos respuesta exitosa al frontend
+    res.status(201).json({ success: true, curso: result.rows[0] });
+  } catch(err) {
+    console.error('Error al insertar el curso:', err);
+    res.status(500).json({ success: false, message: 'Error al guardar en la base de datos' });
+  }
+});
+
+app.delete('/api/cursos/:id', async (req, res)=>{
+  const {id} = req.params;
+
+  try{
+    const query = 'UPDATE cursos SET id_curso_estado = 4, id_usuario_modificacion = 1, fecha_hora_modificacion = CURRENT_TIMESTAMP(0) WHERE id_curso = $1 RETURNING *';
+
+    const result = await pool.query(query, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Curso no encontrado' });
+    }
+    res.json({ success: true, message: 'Curso eliminado exitosamente', curso: result.rows[0] });
+  }catch(err){
+    console.error('Error al eliminar el curso:', err);
+    res.status(500).json({ success: false, message: 'Error al eliminar el curso' });
+  }
+});
+
+
 // Un solo app.listen al final de todo
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

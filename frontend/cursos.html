@@ -111,11 +111,11 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-cursos">
+
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    
                     <div class="card-footer bg-white py-3 border-top-0 text-center">
                         <nav aria-label="Paginación de cursos">
                             <ul class="pagination pagination-sm justify-content-center m-0">
@@ -140,29 +140,33 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form>
+                    <form id="formNuevoCurso">
                         <div class="row mb-3">
                             <div class="col-md-8">
                                 <label class="form-label small fw-bold">Nombre del Curso</label>
-                                <input type="text" class="form-control border-2" required>
+                                <input type="text" id="inputNombre" class="form-control border-2" required>
+                                <div id="errorNombre" class="invalid-feedback">El nombre no puede ser solo números.</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold">Cupo Máximo</label>
-                                <input type="number" class="form-control border-2" placeholder="Ej: 30" required>
+                                <input type="number" id="inputCupo" class="form-control border-2" placeholder="Ej: 30" required>
+                                <div id="errorCupo" class="invalid-feedback">Debe ser mayor a 0.</div>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label small fw-bold">Descripción</label>
-                            <textarea class="form-control border-2" rows="3"></textarea>
+                            <textarea id="inputDescripcion" class="form-control border-2" rows="3"></textarea>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold">Fecha de Inicio</label>
-                                <input type="date" class="form-control border-2" required>
+                                <input type="date" id="inputFecha" class="form-control border-2" required>
+                                <div id="errorFecha" class="invalid-feedback">La fecha no puede ser pasada.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label small fw-bold">Cantidad de Horas</label>
-                                <input type="number" class="form-control border-2" placeholder="Ej: 60" required>
+                                <input type="number" id="inputHoras" class="form-control border-2" placeholder="Ej: 60" required>
+                                <div id="errorHoras" class="invalid-feedback">Debe ser mayor a 0.</div>
                             </div>
                         </div>
                         <div class="d-grid mt-4">
@@ -170,6 +174,34 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow text-center p-3 rounded-4">
+                <div class="modal-body">
+                    <i class="bi bi-exclamation-circle text-danger mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="fw-bold mb-2">¿Estás seguro?</h5>
+                    <p class="text-muted small mb-4">Vas a dar de baja este curso. Pasará a estado eliminado.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btnConfirmarBaja" class="btn btn-danger btn-sm px-3 fw-bold">Sí, eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DEL TOAST (NOTIFICACIÓN) -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toastNotificacion" class="toast align-items-center border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body text-white fw-bold" id="toastMensaje">
+                    <!-- El mensaje se inyecta desde JS -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
     </div>

@@ -16,7 +16,7 @@ const form = document.querySelector('form');
 
                 const data = await response.json();
 
-               if (data.success) {
+            if (data.success) {
                     // Guardamos el token y el nombre para usarlos en todo el sitio
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userName', `${data.user.nombre} ${data.user.apellido}`);
