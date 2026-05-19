@@ -70,25 +70,26 @@
 
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                     <div class="card-body">
-                        <form class="row g-3">
-                            <div class="col-md-4">
+                        <form class="row g-3" id="formFiltros">
+                            <div class="col-md-4" >
                                 <label class="form-label small fw-bold">Buscar por Nombre</label>
-                                <input type="text" class="form-control" placeholder="Ej: Programación IV">
+                                <input type="text" id="filtroNombre" class="form-control" placeholder="Ej: Programación IV">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold">Estado</label>
-                                <select class="form-select">
+                                <select class="form-select" id="filtroEstado">
                                     <option value="">Todos</option>
-                                    <option value="1">Activos</option>
-                                    <option value="0">Inactivos</option>
+                                    <option value="1">Borradores</option>
+                                    <option value="2">Inscripción Abierta</option>
+                                    <option value="3">Inscripción Cerrada</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold">Fecha Inicio</label>
-                                <input type="date" class="form-control">
+                                <input type="date" class="form-control" id="filtroFecha">
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-secondary w-100">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="btnFiltrar">
                                     <i class="bi bi-search me-1"></i> Filtrar
                                 </button>
                             </div>
@@ -194,6 +195,65 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Editar Curso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formEditarCurso" novalidate>
+                        <input type="hidden" id="editIdCurso">
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">Nombre del Curso</label>
+                                <input type="text" id="editNombre" class="form-control border-2" pattern=".*[a-zA-ZñÑáéíóúÁÉÍÓÚ].*" required>
+                                <div class="invalid-feedback">El nombre no puede ser solo números.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Estado</label>
+                                <select class="form-select border-2" id="editEstado" required>
+                                    <option value="1">Borrador</option>
+                                    <option value="2">Inscripción Abierta</option>
+                                    <option value="3">Inscripción Cerrada</option>
+                                </select>
+                                <div class="invalid-feedback">Selecciona un estado.</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Descripción</label>
+                            <textarea id="editDescripcion" class="form-control border-2" rows="3"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Fecha de Inicio</label>
+                                <input type="date" id="editFechaInicio" class="form-control border-2" required>
+                                <div class="invalid-feedback">La fecha no puede ser pasada.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Cantidad de Horas</label>
+                                <input type="number" id="editHoras" class="form-control border-2" min="1" max="32000" placeholder="Ej: 60" required>
+                                <div class="invalid-feedback">Debe ser mayor a 0.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Cupo Máximo</label>
+                                <input type="number" id="editCupo" class="form-control border-2" min="1" max="32000" placeholder="Ej: 30" required>
+                                <div class="invalid-feedback">Debe ser mayor a 0.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary fw-bold py-2 rounded-3">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- CONTENEDOR DEL TOAST (NOTIFICACIÓN) -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="toastNotificacion" class="toast align-items-center border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">

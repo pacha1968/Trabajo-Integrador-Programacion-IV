@@ -84,13 +84,13 @@ app.get('/api/stats', async (req, res) => {
 // Ruta POST para crear un nuevo curso
 app.post('/api/cursos', async (req, res) => {
   // Extraemos los datos que envía el frontend
-  const {nombre, cupo, descripcion, fechaInicio, cantidadHoras } = req.body;
+  const {nombre, cupo, descripcion, fecha_inicio, cantidad_horas } = req.body;
   
   if (!nombre || nombre.trim() === '' || !isNaN(nombre.trim())) {
       return res.status(400).json({ success: false, message: 'El nombre del curso es inválido o son solo números.' });
   }
 
-  if (cantidadHoras <= 0 || cupo <= 0) {
+  if (cantidad_horas <= 0 || cupo <= 0) {
       return res.status(400).json({ success: false, message: 'Las horas y los cupos deben ser números positivos.' });
   }
 
@@ -98,7 +98,7 @@ app.post('/api/cursos', async (req, res) => {
   hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
   const fechaHoyFormateada = hoy.toISOString().split('T')[0];
 
-  if (fechaInicio < fechaHoyFormateada) {
+  if (fecha_inicio < fechaHoyFormateada) {
       return res.status(400).json({ success: false, message: 'La fecha de inicio no puede ser en el pasado.' });
   }
 
@@ -111,7 +111,7 @@ app.post('/api/cursos', async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, 1, 1, CURRENT_TIMESTAMP(0)) 
       RETURNING *
     `;
-    const values = [nombre, descripcion, fechaInicio, cantidadHoras, cupo]; 
+    const values = [nombre, descripcion, fecha_inicio, cantidad_horas, cupo]; 
 
     // Ejecutamos la consulta
     const result = await pool.query(query, values);
@@ -141,6 +141,38 @@ app.delete('/api/cursos/:id', async (req, res)=>{
     res.status(500).json({ success: false, message: 'Error al eliminar el curso' });
   }
 });
+
+
+//Actualizar curso existente
+app.put('/api/cursos/:id', async (req, res) => {
+
+  //obtenemos el id desde la url
+  const idCurso = req.params.id;
+  //Extraemos los datos que envia el front
+  const{nombre, descripcion, fecha_inicio, cantidad_horas, inscriptos_max, id_curso_estado} = req.body;
+  
+  try {
+    //armamos la consulta SQL para actualizar el curso
+    const query = 'UPDATE cursos SET nombre = $1, descripcion = $2, fecha_inicio = $3, cantidad_horas= $4, inscriptos_max = $5, id_curso_estado = $6, id_usuario_modificacion = 1, fecha_hora_modificacion = CURRENT_TIMESTAMP(0) WHERE id_curso = $7 RETURNING *';
+    //asignamos los valores a los parametros de la consulta
+    const values = [nombre, descripcion, fecha_inicio, cantidad_horas, inscriptos_max, id_curso_estado, idCurso];
+    //ejecutamos la consulta
+    const result = await pool.query(query, values);
+    //validamos que exista el curso a actualizar
+    if(result.rowCount === 0){
+      return res.status(404).json({ success: false, message: 'Curso no encontrado' });
+    }
+
+    //respuesta exitosa
+    res.status(200).json({ success: true, message: 'Curso actualizado exitosamente', curso: result.rows[0] });
+  } catch (error) {
+      console.error('Error en el PUT', error);
+      res.status(500).json({ success: false, message: 'Error al actualizar el curso' });
+  }
+});
+
+
+
 
 
 // Un solo app.listen al final de todo
