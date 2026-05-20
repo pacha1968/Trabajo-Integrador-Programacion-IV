@@ -68,7 +68,7 @@ Crear el archivo de entorno:
 cp .env.example .env
 ```
 
-Editar el archivo `.env` con las credenciales correspondientes de PostgreSQL.
+Editar el archivo `.env` con las credenciales correspondientes de PostgreSQL y la clave secreta de JWT.
 
 ---
 
@@ -110,11 +110,14 @@ en el navegador web.
 │   └── *.html             # Vistas de la aplicación
 │
 ├── backend/               # Lado del Servidor (API REST)
-│   ├── index.js           # Punto de entrada principal
+│   ├── src/               # Código fuente de la API
+│   │   ├── config/        # Configuración de conexión a la BD
+│   │   ├── controllers/   # Manejo de peticiones y respuestas (req, res)
+│   │   ├── repositories/  # Capa de acceso a datos (Consultas SQL)
+│   │   └── routes/        # Definición de endpoints
+│   ├── index.js           # Punto de entrada principal y middlewares
 │   ├── .env.example       # Variables de entorno de ejemplo
 │   └── package.json       # Dependencias y scripts
-│
-├── database/              # Scripts SQL y estructura de BD
 │
 ├── .gitignore             # Archivos ignorados por Git
 └── README.md              # Documentación del proyecto
@@ -122,15 +125,12 @@ en el navegador web.
 
 ---
 
-# 🗺️ Roadmap y Evolución Arquitectónica
+## 🏗️ Arquitectura del Sistema
 
-Para esta **Primera Entrega**, el backend se encuentra centralizado en un único archivo (`index.js`) con el objetivo de garantizar una implementación funcional rápida y cumplir con los requisitos mínimos solicitados por la cátedra.
+El diseño del lado del servidor se fundamenta en el principio de **Separación de Responsabilidades (Separation of Concerns)**. Se abandonó el enfoque monolítico inicial para adoptar una estructura modular en capas, lo que permite escalar el sistema hacia futuros módulos (Estudiantes, Inscripciones) de forma segura.
 
-## 🔜 Plan para la Entrega Final
-
-El proyecto será refactorizado hacia una arquitectura modular basada en separación de responsabilidades, implementando:
-
-- Routes
-- Controllers
-- Services
-- Repositories
+La topología del backend se compone de:
+* 🔀 **Routes:** Definen las URLs y derivan el tráfico.
+* 🧠 **Controllers:** Manejan las validaciones y las respuestas al cliente.
+* 💾 **Repositories:** Contienen de forma exclusiva las consultas SQL a PostgreSQL.
+* ⚙️ **Config:** Administra la conexión a la base de datos y credenciales de forma segura.
