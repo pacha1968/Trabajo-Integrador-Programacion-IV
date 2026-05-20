@@ -1,8 +1,8 @@
-require('dotenv').config(); //
+require('dotenv').config(); 
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const jwt = require('jsonwebtoken'); //
+const jwt = require('jsonwebtoken'); 
 const crypto = require('crypto'); // Para hashear la contraseña
 
 const app = express();
@@ -66,6 +66,7 @@ app.get('/api/cursos', async (req, res) => {
   }
 });
 
+// Ruta para obtener estadísticas de alumnos y cursos
 app.get('/api/stats', async (req, res) => {
     try {
         // Contamos alumnos activos y cursos que no estén eliminados (Soft Delete)
@@ -103,8 +104,6 @@ app.post('/api/cursos', async (req, res) => {
   }
 
   try {
-    // Armamos la consulta SQL (Usamos $1, $2 para evitar inyecciones SQL)
-    // Asumimos que id_curso_estado = 1 significa "Activo" (ajustalo si usas otro ID)
     const query = `
       INSERT INTO cursos 
       (nombre, descripcion, fecha_inicio, cantidad_horas, inscriptos_max, id_curso_estado, id_usuario_modificacion, fecha_hora_modificacion) 
@@ -112,11 +111,8 @@ app.post('/api/cursos', async (req, res) => {
       RETURNING *
     `;
     const values = [nombre, descripcion, fecha_inicio, cantidad_horas, cupo]; 
-
-    // Ejecutamos la consulta
     const result = await pool.query(query, values);
     
-    // Devolvemos respuesta exitosa al frontend
     res.status(201).json({ success: true, curso: result.rows[0] });
   } catch(err) {
     console.error('Error al insertar el curso:', err);
@@ -124,6 +120,7 @@ app.post('/api/cursos', async (req, res) => {
   }
 });
 
+// Ruta DELETE para eliminar un curso (Soft Delete)
 app.delete('/api/cursos/:id', async (req, res)=>{
   const {id} = req.params;
 
@@ -143,9 +140,8 @@ app.delete('/api/cursos/:id', async (req, res)=>{
 });
 
 
-//Actualizar curso existente
+// Ruta PUT para actualizar un curso
 app.put('/api/cursos/:id', async (req, res) => {
-
   //obtenemos el id desde la url
   const idCurso = req.params.id;
   //Extraemos los datos que envia el front
@@ -163,7 +159,6 @@ app.put('/api/cursos/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Curso no encontrado' });
     }
 
-    //respuesta exitosa
     res.status(200).json({ success: true, message: 'Curso actualizado exitosamente', curso: result.rows[0] });
   } catch (error) {
       console.error('Error en el PUT', error);
@@ -172,10 +167,6 @@ app.put('/api/cursos/:id', async (req, res) => {
 });
 
 
-
-
-
-// Un solo app.listen al final de todo
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);

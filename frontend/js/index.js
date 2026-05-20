@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Ponemos el nombre del admin en la barra de navegación
     const nombreAdmin = localStorage.getItem('userName');
     const displayAdmin = document.querySelector('.text-white.text-end span');
     if (nombreAdmin && displayAdmin) displayAdmin.textContent = nombreAdmin;

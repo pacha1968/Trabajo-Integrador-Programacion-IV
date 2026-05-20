@@ -46,7 +46,7 @@ function renderizarTabla(arrayDeCursos) {
                 break;
             case 3: 
                 estadoTexto = 'Inscripción Cerrada';
-                badgeClass = 'bg-warning-subtle text-warning';
+                badgeClass = 'bg-danger-subtle text-danger';
                 break;
             default:
                 estadoTexto = 'Desconocido';
@@ -106,25 +106,19 @@ if (btnFiltrar) {
 
         // 3. Filtramos la memoria global
         const cursosFiltrados = cursosCache.filter(curso => {
-            
-            // REGLA A (Nombre): ¡AQUÍ TAMBIÉN LE APLICAMOS LA FUNCIÓN MÁGICA al nombre de la BD!
+        
             const nombreCurso = quitarTildes((curso.nombre || "").toLowerCase());
             const coincideNombre = textoNombre === "" || nombreCurso.includes(textoNombre);
 
-            // REGLA B (Estado)
             const coincideEstado = valorEstado === "" || curso.id_curso_estado.toString() === valorEstado;
 
-            // REGLA C (Fecha)
             let coincideFecha = true;
             if (valorFecha !== "") {
                 const fechaCurso = curso.fecha_inicio ? curso.fecha_inicio.split('T')[0] : "";
                 coincideFecha = fechaCurso === valorFecha;
             }
-
             return coincideNombre && coincideEstado && coincideFecha;
         });
-
-        // 4. Llamamos a la dibujante
         renderizarTabla(cursosFiltrados);
     });
 }
@@ -138,15 +132,10 @@ function formatearFecha(fechaString) {
 }
 
 
-
-
-
-// Seleccionamos el formulario usando el ID que le pusimos en el HTML
 const formNuevoCurso = document.getElementById('formNuevoCurso');
 
 if (formNuevoCurso) {
     formNuevoCurso.addEventListener('submit', async (e) => {
-        // Evitamos que la página se recargue sola
         e.preventDefault();
 
         const inputs = formNuevoCurso.querySelectorAll('.form-control');
@@ -283,7 +272,6 @@ if (btnConfirmarBaja) {
                 
                 cargarCursos(); 
             } else {
-                
                 toastElement.classList.remove('text-bg-success');
                 toastElement.classList.add('text-bg-danger');
                 toastMensaje.textContent = 'Error: ' + data.message;
@@ -336,7 +324,7 @@ const formEditarCurso = document.getElementById('formEditarCurso');
 
 if(formEditarCurso){
     formEditarCurso.addEventListener('submit', async (e) => {
-        e.preventDefault();//evitar que la pagina se recargue sola 
+        e.preventDefault();
         if (!formEditarCurso.checkValidity()) {
             e.stopPropagation(); 
             formEditarCurso.classList.add('was-validated'); // Pinta los bordes de rojo y muestra los textos
