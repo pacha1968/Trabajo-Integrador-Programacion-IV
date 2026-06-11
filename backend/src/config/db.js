@@ -1,6 +1,7 @@
-// backend/src/config/db.js
-require('dotenv').config();
-const { Pool } = require('pg');
+
+import 'dotenv/config'; 
+import pg from 'pg';
+const { Pool } = pg;
 
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -10,4 +11,4 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
-module.exports = pool; // Exportamos el pool para poder usarlo en otras capas
+export default pool; 

@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const usuarioRepository = require('../repositories/usuario.repository.js');
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import usuarioRepository from '../repositories/usuario.repository.js'; 
 
 const login = async (req, res) => {
     const { username, password } = req.body;
@@ -30,6 +30,6 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = {
+export default {
     login
-}
+};

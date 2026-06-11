@@ -1,27 +1,36 @@
 const tablaCursos = document.getElementById('tabla-cursos');
 let cursosCache = [];
+let paginaActual = 1;
 
 
-async function cargarCursos(){
+async function cargarCursos() {
     try {
-        const response = await fetch('http://localhost:3000/api/cursos');
+        // 1. Capturamos los valores directamente
+        const inputNombre = document.getElementById('filtroNombre')?.value.trim() || '';
+        const inputEstado = document.getElementById('filtroEstado')?.value || '';
+        const inputFecha = document.getElementById('filtroFecha')?.value || '';
+
+        // 2. Armamos la URL para el Backend
+        const url = `http://localhost:3000/api/cursos?page=${paginaActual}&limit=5&nombre=${encodeURIComponent(inputNombre)}&estado=${encodeURIComponent(inputEstado)}&fecha=${encodeURIComponent(inputFecha)}`;
         
-        if (!response.ok){
+        const response = await fetch(url);
+        
+        if (!response.ok) {
             throw new Error('Error en la respuesta del servidor');
         }
 
-        const cursos = await response.json();
-        cursosCache = cursos; // Guardamos TODOS los cursos en la memoria global
+        const respuesta = await response.json();
+        cursosCache = respuesta.data; 
         
-        // Mandamos a dibujar la tabla por primera vez con todos los datos
+        // 3. Dibujamos la tabla y los botones
         renderizarTabla(cursosCache); 
+        renderizarBotonesPaginacion(respuesta.pagination);
 
     } catch (error) {
         console.error(error);
-        tablaCursos.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Ocurrió un error al cargar el catálogo. Verificá que el backend esté encendido (node index.js).</td></tr>';
+        tablaCursos.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Ocurrió un error al cargar el catálogo. Verificá la conexión al servidor.</td></tr>';
     }
 }
-
 function renderizarTabla(arrayDeCursos) {
     tablaCursos.innerHTML = '';
     const cursosActivos = arrayDeCursos.filter(curso => curso.id_curso_estado !== 4);
@@ -80,46 +89,19 @@ function renderizarTabla(arrayDeCursos) {
 // ==========================================
 // 3. LÓGICA DEL BOTÓN DE FILTRADO
 // ==========================================
-const btnFiltrar = document.getElementById('btnFiltrar');
+const btnFiltrarViejo = document.getElementById('btnFiltrar');
 
-const quitarTildes = (texto) => {
-    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-};
+if (btnFiltrarViejo) {
+    // TRUCO PRO: Clonamos el botón y reemplazamos el original. 
+    // Esto destruye automáticamente cualquier evento 'click' del código viejo que haya quedado en memoria.
+    const btnFiltrarNuevo = btnFiltrarViejo.cloneNode(true);
+    btnFiltrarViejo.parentNode.replaceChild(btnFiltrarNuevo, btnFiltrarViejo);
 
-if (btnFiltrar) {
-    btnFiltrar.addEventListener('click', (e) => {
+    // Le agregamos el evento limpio
+    btnFiltrarNuevo.addEventListener('click', (e) => {
         e.preventDefault(); 
-        
-        const inputNombre = document.getElementById('filtroNombre');
-        const inputEstado = document.getElementById('filtroEstado');
-        const inputFecha = document.getElementById('filtroFecha');
-
-        if (!inputNombre || !inputEstado || !inputFecha) {
-            console.error("¡Error! No se encontraron los IDs (filtroNombre, filtroEstado, filtroFecha) en el HTML.");
-            return;
-        }
-
-        // 2. Capturamos los valores ¡Y LE APLICAMOS LA FUNCIÓN MÁGICA!
-        const textoNombre = quitarTildes(inputNombre.value.toLowerCase().trim());
-        const valorEstado = inputEstado.value;
-        const valorFecha = inputFecha.value;
-
-        // 3. Filtramos la memoria global
-        const cursosFiltrados = cursosCache.filter(curso => {
-        
-            const nombreCurso = quitarTildes((curso.nombre || "").toLowerCase());
-            const coincideNombre = textoNombre === "" || nombreCurso.includes(textoNombre);
-
-            const coincideEstado = valorEstado === "" || curso.id_curso_estado.toString() === valorEstado;
-
-            let coincideFecha = true;
-            if (valorFecha !== "") {
-                const fechaCurso = curso.fecha_inicio ? curso.fecha_inicio.split('T')[0] : "";
-                coincideFecha = fechaCurso === valorFecha;
-            }
-            return coincideNombre && coincideEstado && coincideFecha;
-        });
-        renderizarTabla(cursosFiltrados);
+        paginaActual = 1; // Al aplicar un filtro, siempre volvemos a la página 1
+        cargarCursos(); 
     });
 }
 function formatearFecha(fechaString) {
@@ -184,10 +166,12 @@ if (formNuevoCurso) {
 
         try {
             // Hacemos la petición POST al backend
+            const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:3000/api/cursos', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(nuevoCurso)
             });
@@ -247,8 +231,12 @@ if (btnConfirmarBaja) {
         if (!idCursoSeleccionado) return;
 
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`http://localhost:3000/api/cursos/${idCursoSeleccionado}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             const data = await response.json();
@@ -352,15 +340,19 @@ if(formEditarCurso){
             descripcion: document.getElementById('editDescripcion').value,
             fecha_inicio: inputFecha,
             cantidad_horas: parseInt(document.getElementById('editHoras').value),
-            inscriptos_max: parseInt(document.getElementById('editCupo').value)
+            
+            // Le mandamos las dos para satisfacer a todas las capas del backend:
+            cupo: parseInt(document.getElementById('editCupo').value),          // Para que el middleware valide
+            inscriptos_max: parseInt(document.getElementById('editCupo').value) // Para que el controlador guarde en la BD
         };
-
         try {
             //peticion PUT al backend
+            const token = localStorage.getItem('token');
             const response = await fetch(`http://localhost:3000/api/cursos/${idCurso}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(datosEditados)
             });
@@ -392,6 +384,49 @@ if(formEditarCurso){
     });
 }
 
+// ==========================================
+// 3. BOTONES DE PAGINACIÓN
+// ==========================================
+function renderizarBotonesPaginacion(pagination) {
+    let contenedor = document.getElementById('paginacion-container');
+    if (!contenedor) {
+        contenedor = document.createElement('div');
+        contenedor.id = 'paginacion-container';
+        contenedor.className = 'd-flex justify-content-center mt-3';
+        tablaCursos.closest('table').after(contenedor);
+    }
 
+    // Si no hay resultados, ocultamos la paginación
+    if (pagination.totalItems === 0) {
+        contenedor.innerHTML = '';
+        return;
+    }
 
+    contenedor.innerHTML = `
+        <nav>
+            <ul class="pagination shadow-sm">
+                <li class="page-item ${pagination.currentPage === 1 ? 'disabled' : ''}">
+                    <button class="page-link" onclick="cambiarPagina(${pagination.currentPage - 1})">
+                        <i class="bi bi-chevron-left"></i> Anterior
+                    </button>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link text-dark fw-semibold">
+                        Página ${pagination.currentPage} de ${pagination.totalPages}
+                    </span>
+                </li>
+                <li class="page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}">
+                    <button class="page-link" onclick="cambiarPagina(${pagination.currentPage + 1})">
+                        Siguiente <i class="bi bi-chevron-right"></i>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    `;
+}
+
+window.cambiarPagina = function(nuevaPagina) {
+    paginaActual = nuevaPagina;
+    cargarCursos(); 
+};
 document.addEventListener('DOMContentLoaded', cargarCursos);

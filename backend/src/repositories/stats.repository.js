@@ -1,4 +1,4 @@
-const pool = require('../config/db.js');
+import pool from '../config/db.js';
 
 const obtenerEstadisticas = async () => {
     const estudiantes = await pool.query('SELECT COUNT(*) FROM estudiantes WHERE activo = 1');
@@ -9,6 +9,6 @@ const obtenerEstadisticas = async () => {
     };
 }
 
-module.exports = {
+export default {
     obtenerEstadisticas
 };

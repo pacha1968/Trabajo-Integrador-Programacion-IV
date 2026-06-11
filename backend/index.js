@@ -1,12 +1,11 @@
-require('dotenv').config(); 
-const express = require('express');
-const cors = require('cors');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
 
-const pool = require('./src/config/db.js');
-
-const authRoutes = require('./src/routes/auth.routes.js');
-const cursoRoutes = require('./src/routes/curso.routes.js');
-const statsRoutes = require('./src/routes/stats.routes.js');
+import pool from './src/config/db.js';
+import authRoutes from './src/routes/auth.routes.js';
+import cursoRoutes from './src/routes/curso.routes.js';
+import statsRoutes from './src/routes/stats.routes.js';
 
 const app = express();
 

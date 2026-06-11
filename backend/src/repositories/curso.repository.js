@@ -1,11 +1,50 @@
-const pool = require('../config/db.js');
+import pool from '../config/db.js';
 
-//funcion para obtener todos los cursos de la base de datos
-const obtenerCursos = async () => {
-    const result = await pool.query('SELECT * FROM cursos');
-    return result.rows;
+const obtenerCursos = async (limit, offset, filters = {}) => {
+    // 1. Array para guardar las condiciones (siempre excluimos los eliminados)
+    let whereClauses = ['id_curso_estado != 4'];
+    let values = [];
+    let paramIndex = 1;
+
+    // 2. Filtro por Nombre
+    if (filters.nombre) {
+        whereClauses.push(`nombre ILIKE $${paramIndex}`);
+        values.push(`%${filters.nombre}%`);
+        paramIndex++;
+    }
+
+    // 3. Filtro por Estado 
+    if (filters.estado) {
+        whereClauses.push(`id_curso_estado = $${paramIndex}`);
+        values.push(parseInt(filters.estado));
+        paramIndex++;
+    }
+
+    // 4. Filtro por Fecha
+    if (filters.fecha) {
+        whereClauses.push(`fecha_inicio::date = $${paramIndex}`);
+        values.push(filters.fecha);
+        paramIndex++;
+    }
+
+    // Unimos todo con " AND "
+    const whereString = 'WHERE ' + whereClauses.join(' AND ');
+
+    // 5. Contamos el total REAL usando el mismo array de values
+    const queryTotal = `SELECT COUNT(*) FROM cursos ${whereString}`;
+    const totalResult = await pool.query(queryTotal, values);
+    const totalCursos = parseInt(totalResult.rows[0].count);
+
+    // 6. Buscamos los cursos. Creamos una copia de values para no romper la consulta anterior
+    const queryCursos = `SELECT * FROM cursos ${whereString} ORDER BY id_curso_estado ASC, id_curso ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    const valuesCursos = [...values, limit, offset];
+    const result = await pool.query(queryCursos, valuesCursos);
+
+    return {
+        cursos: result.rows,
+        total: totalCursos
+    };
 };
-
 //funcion para crear un nuevo curso en la base de datos
 const crearCurso = async (datos) =>{
     const query = `
@@ -36,7 +75,7 @@ const actualizarCurso = async (id, datos) => {
 }
 
 
-module.exports = {
+export default{
     obtenerCursos,
     crearCurso,
     eliminarCurso,

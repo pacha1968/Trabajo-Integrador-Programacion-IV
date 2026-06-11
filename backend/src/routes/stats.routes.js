@@ -1,8 +1,8 @@
-const express = require('express');
+import express from 'express';
+import statsController from '../controllers/stats.controller.js'; 
 const router = express.Router();
-const statsController = require('../controllers/stats.controller.js');
 
-// Ruta para obtener estadísticas de alumnos y cursos
+// ruta actual:
 router.get('/', statsController.obtenerEstadisticas);
 
-module.exports = router;
+export default router;

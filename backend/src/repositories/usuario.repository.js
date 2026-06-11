@@ -1,4 +1,4 @@
-const pool = require('../config/db.js');
+import pool from '../config/db.js';
 
 const buscarUsuarioParaLogin = async (username, passwordHash) => {
     const result = await pool.query(
@@ -8,6 +8,6 @@ const buscarUsuarioParaLogin = async (username, passwordHash) => {
     return result.rows[0]; // Devuelve el usuario encontrado o undefined si no existe
 };
 
-module.exports = {
+export default {
     buscarUsuarioParaLogin
 }

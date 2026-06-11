@@ -1,4 +1,5 @@
-const statsRepository = require('../repositories/stats.repository.js');
+import usuarioRepository from '../repositories/usuario.repository.js';
+import statsRepository from '../repositories/stats.repository.js';
 
 const obtenerEstadisticas = async (req, res) => {
     try {
@@ -10,6 +11,6 @@ const obtenerEstadisticas = async (req, res) => {
     }
 }; 
 
-module.exports = {
+export default {
     obtenerEstadisticas
 };

@@ -1,12 +1,43 @@
-const cursoRepository = require('../repositories/curso.repository.js');
-
+import usuarioRepository from '../repositories/usuario.repository.js';
+import cursoRepository from '../repositories/curso.repository.js';
 const obtenerCursos = async (req, res) => {
     try {
-        const cursos = await cursoRepository.obtenerCursos();
-        res.json(cursos);
-    } catch (error) {
-        console.error('Error al obtener cursos:', error);
-        res.status(500).json({ message: error.message });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+
+        // Limpiamos los filtros: Solo los pasamos si REALMENTE tienen algo válido
+        const filters = {};
+        
+        if (req.query.nombre && req.query.nombre !== 'undefined' && req.query.nombre.trim() !== '') {
+            filters.nombre = req.query.nombre;
+        }
+        
+        // Evitamos que pasen valores vacíos, "0", o textos como "Todos"
+        if (req.query.estado && req.query.estado !== '0' && req.query.estado !== 'Todos' && req.query.estado !== 'undefined' && req.query.estado !== '') {
+            filters.estado = req.query.estado;
+        }
+        
+        if (req.query.fecha && req.query.fecha !== 'undefined' && req.query.fecha !== '') {
+            filters.fecha = req.query.fecha;
+        }
+
+        const { cursos, total } = await cursoRepository.obtenerCursos(limit, offset, filters);
+        const totalPages = Math.ceil(total / limit);
+
+        res.json({
+            success: true,
+            data: cursos,
+            pagination: {
+                totalItems: total,
+                totalPages: totalPages || 1, // Si no hay resultados, mostramos al menos 1 página vacía
+                currentPage: page,
+                itemsPerPage: limit
+            }
+        });
+    } catch (err) {
+        console.error('Error al consultar los cursos', err);
+        res.status(500).json({ success: false, message: 'Error del servidor' });
     }
 };
 
@@ -64,7 +95,7 @@ const actualizarCurso = async (req, res) => {
     }
 };
 
-module.exports = {
+export default {
     obtenerCursos,
     crearCurso,
     eliminarCurso,
