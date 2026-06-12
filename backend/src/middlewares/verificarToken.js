@@ -19,7 +19,7 @@ export const verificarToken = (req, res, next) => {
         // 4. Guardamos los datos del usuario en la request por si el controlador los necesita
         req.usuario = payloadDecodificado;
         
-        // 5. ¡Todo en orden! 
+        // 5. Si todo está bien, dejamos pasar la petición al siguiente middleware o controlador
         next();
     } catch (error) {
         // Si el token es falso, lo inventaron o se venció (pasaron las 2hs):
