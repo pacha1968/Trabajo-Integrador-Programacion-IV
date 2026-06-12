@@ -63,7 +63,14 @@
                         <i class="bi bi-plus-lg me-"></i> Nuevo Estudiante
                     </button>
                 </div>
-
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="inputBusqueda" class="form-control border-start-0" placeholder="Buscar por DNI o Apellido...">
+                        </div>
+                    </div>
+                </div>
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -78,7 +85,7 @@
                                         <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tabla-estudiantes">
                                     <tr>
                                         <td class="ps-4 fw-bold">35.123.456</td>
                                         <td>Juan</td>
@@ -117,24 +124,28 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form>
+                    <form id="formNuevoEstudiante">
                         <div class="mb-3">
                             <label class="form-label small fw-bold">DNI</label>
-                            <input type="text" class="form-control border-2" placeholder="Sin puntos">
+                            <input type="text" class="form-control border-2" id="documento" placeholder="Sin puntos" required>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label small fw-bold">Nombre</label>
-                                <input type="text" class="form-control border-2">
+                                <input type="text" class="form-control border-2" id="nombres" required>
                             </div>
                             <div class="col">
                                 <label class="form-label small fw-bold">Apellido</label>
-                                <input type="text" class="form-control border-2">
+                                <input type="text" class="form-control border-2" id="apellido" required>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Email Institucional</label>
-                            <input type="email" class="form-control border-2">
+                            <input type="email" class="form-control border-2" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control border-2" id="fecha_nacimiento" required>
                         </div>
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary fw-bold py-2">Guardar Estudiante</button>
@@ -146,5 +157,7 @@
     </div>
 
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/estudiantes.js"></script>
 </body>
 </html>
