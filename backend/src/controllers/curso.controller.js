@@ -1,5 +1,6 @@
 import usuarioRepository from '../repositories/usuario.repository.js';
 import cursoRepository from '../repositories/curso.repository.js';
+
 const obtenerCursos = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
