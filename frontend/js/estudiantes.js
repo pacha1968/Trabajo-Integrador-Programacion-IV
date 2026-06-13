@@ -8,14 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. EL VIGILANTE FRONTEND: Verificamos si hay token
     const token = localStorage.getItem('token');
     if (!token) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Acceso Denegado',
-            text: 'Sesión expirada o no válida. Por favor, inicie sesión.',
-            confirmButtonColor: '#0d6efd'
-        }).then(() => {
-            window.location.href = 'login.html';
-        });
+        window.location.href = 'login.html';
         return;
     }
 
@@ -30,9 +23,39 @@ document.addEventListener('DOMContentLoaded', () => {
     let estudiantesActuales = []; // Guardamos los datos en memoria para leerlos rápido al editar
 
     const inputBusqueda = document.getElementById('inputBusqueda');
-    const contenedorPaginacion = document.querySelector('.pagination');
+    // ACTUALIZADO: Apuntamos al nuevo contenedor que creaste en el HTML
+    const contenedorPaginacion = document.getElementById('paginacion-container');
+    
+    const nombreAdmin = localStorage.getItem('userName');
+    const displayAdmin = document.querySelector('.text-white.text-end span');
+    if (nombreAdmin && displayAdmin) {
+        displayAdmin.textContent = nombreAdmin;
+    }
 
-    // Escuchamos el buscador
+    // ==========================================
+    // ALERTAS UNIFICADAS CON SWEETALERT2
+    // ==========================================
+    const manejarAlerta = (esExitoso, titulo, mensaje) => {
+        if (esExitoso) {
+            Swal.fire({
+                icon: 'success',
+                title: titulo,
+                text: mensaje || 'Operación realizada correctamente.',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: titulo || 'Ocurrió un problema',
+                text: mensaje || 'Error de conexión con el servidor.',
+                confirmButtonColor: '#0056b3'
+            });
+        }
+    };
+    
+    // Escuchamos el buscador (LIVE SEARCH)
     inputBusqueda.addEventListener('keyup', (e) => {
         busquedaActual = e.target.value;
         paginaActual = 1; 
@@ -74,46 +97,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 renderizarPaginacion(data.pagination);
             } else {
-                Swal.fire({ icon: 'error', title: 'Error al cargar', text: data.message });
+                manejarAlerta(false, 'Error al cargar', data.message);
             }
         } catch (error) {
             console.error("Error cargando estudiantes:", error);
-            Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.' });
+            manejarAlerta(false, 'Error crítico', 'No se pudo conectar con el servidor.');
         }
     };
 
-    // Función para dibujar la paginación
-    const renderizarPaginacion = (pag) => {
+    // Función unificada para dibujar la paginación
+    const renderizarPaginacion = (pagination) => {
         contenedorPaginacion.innerHTML = ''; 
-        
-        const liAnterior = document.createElement('li');
-        liAnterior.className = `page-item ${pag.page === 1 ? 'disabled' : ''}`;
-        liAnterior.innerHTML = `<a class="page-link border-0" href="#" style="cursor: ${pag.page === 1 ? 'default' : 'pointer'}">Anterior</a>`;
-        liAnterior.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (pag.page > 1) { paginaActual--; cargarEstudiantes(); }
-        });
-        contenedorPaginacion.appendChild(liAnterior);
 
-        for (let i = 1; i <= pag.totalPages; i++) {
-            const liNum = document.createElement('li');
-            liNum.className = `page-item ${pag.page === i ? 'active' : ''}`;
-            liNum.innerHTML = `<a class="page-link border-0 ${pag.page === i ? 'rounded-circle mx-1' : 'text-primary'}" href="#">${i}</a>`;
-            liNum.addEventListener('click', (e) => {
-                e.preventDefault();
-                paginaActual = i; cargarEstudiantes();
+        // Adaptación clave: leemos 'page' en lugar de 'currentPage' según tu API de estudiantes
+        const paginaActualBackend = pagination.page;
+        const totalPaginasBackend = pagination.totalPages;
+
+        if (totalPaginasBackend === 0) return;
+        
+        const nav = document.createElement('nav');
+        const ul = document.createElement('ul');
+        ul.className = 'pagination pagination-sm m-0 shadow-sm'; 
+
+        const liAnterior = document.createElement('li');
+        liAnterior.className = `page-item ${paginaActualBackend === 1 ? 'disabled' : ''}`;
+        liAnterior.innerHTML = `<button class="page-link border-0"><i class="bi bi-chevron-left"></i> Anterior</button>`;
+        if (paginaActualBackend > 1) {
+            liAnterior.addEventListener('click', () => {
+                paginaActual = paginaActualBackend - 1;
+                cargarEstudiantes();
             });
-            contenedorPaginacion.appendChild(liNum);
         }
+        ul.appendChild(liAnterior);
+
+        const liInfo = document.createElement('li');
+        liInfo.className = 'page-item disabled';
+        liInfo.innerHTML = `<span class="page-link border-0 text-dark fw-semibold mx-2">Página ${paginaActualBackend} de ${totalPaginasBackend}</span>`;
+        ul.appendChild(liInfo);
 
         const liSiguiente = document.createElement('li');
-        liSiguiente.className = `page-item ${pag.page === pag.totalPages || pag.totalPages === 0 ? 'disabled' : ''}`;
-        liSiguiente.innerHTML = `<a class="page-link border-0 text-primary" href="#" style="cursor: ${pag.page === pag.totalPages ? 'default' : 'pointer'}">Siguiente</a>`;
-        liSiguiente.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (pag.page < pag.totalPages) { paginaActual++; cargarEstudiantes(); }
-        });
-        contenedorPaginacion.appendChild(liSiguiente);
+        liSiguiente.className = `page-item ${paginaActualBackend === totalPaginasBackend ? 'disabled' : ''}`;
+        liSiguiente.innerHTML = `<button class="page-link border-0 text-primary">Siguiente <i class="bi bi-chevron-right"></i></button>`;
+        if (paginaActualBackend < totalPaginasBackend) {
+            liSiguiente.addEventListener('click', () => {
+                paginaActual = paginaActualBackend + 1;
+                cargarEstudiantes();
+            });
+        }
+        ul.appendChild(liSiguiente);
+
+        nav.appendChild(ul);
+        contenedorPaginacion.appendChild(nav);
     };
 
     // 3. CREAR O ACTUALIZAR ESTUDIANTE (POST / PUT)
@@ -128,13 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
             fecha_nacimiento: document.getElementById('fecha_nacimiento').value 
         };
 
-        // Decidimos el método HTTP y la URL dependiendo si estamos editando o creando
         const metodo = estudianteEditandoId ? 'PUT' : 'POST';
         const urlEndpoint = estudianteEditandoId 
             ? `http://localhost:3000/api/estudiantes/${estudianteEditandoId}` 
             : 'http://localhost:3000/api/estudiantes';
 
-        try {
+        try { 
             const response = await fetch(urlEndpoint, {
                 method: metodo,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -144,30 +177,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
-                // Cerramos modal
-                const modalElement = document.getElementById('modalNuevoEstudiante');
-                bootstrap.Modal.getInstance(modalElement).hide();
-
-                // Recargamos datos
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevoEstudiante')).hide();
                 cargarEstudiantes();
                 
-                // Alerta de éxito dinámica
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Excelente!',
-                    text: estudianteEditandoId ? 'El estudiante fue actualizado correctamente.' : 'El estudiante fue registrado correctamente.',
-                    confirmButtonColor: '#0d6efd'
-                });
+                // Usamos la función estandarizada
+                const mensajeExito = estudianteEditandoId ? 'El estudiante fue actualizado correctamente.' : 'El estudiante fue registrado correctamente.';
+                manejarAlerta(true, '¡Excelente!', mensajeExito);
             } else {
                 if (data.errors) {
                     const mensajes = data.errors.map(err => err.msg).join('\n');
-                    Swal.fire({ icon: 'warning', title: 'Datos incorrectos', text: mensajes, confirmButtonColor: '#0d6efd' });
+                    manejarAlerta(false, 'Datos incorrectos', mensajes);
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Error al procesar la solicitud', confirmButtonColor: '#0d6efd' });
+                    manejarAlerta(false, 'Error', data.message || 'Error al procesar la solicitud');
                 }
             }
         } catch (error) {
-            Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo contactar al servidor.', confirmButtonColor: '#0d6efd' });
+            console.error(error);
+            manejarAlerta(false, 'Error crítico', 'No se pudo contactar al servidor.');
         }
     });
 
@@ -191,13 +217,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     const data = await response.json();
                     if (data.success) {
-                        Swal.fire({ icon: 'success', title: '¡Eliminado!', text: 'Dado de baja exitosamente.', confirmButtonColor: '#0d6efd' });
+                        manejarAlerta(true, '¡Eliminado!', 'Dado de baja exitosamente.');
                         cargarEstudiantes();
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Error', text: data.message });
+                        manejarAlerta(false, 'Error', data.message);
                     }
                 } catch (error) {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo contactar al servidor.' });
+                    console.error(error);
+                    manejarAlerta(false, 'Error crítico', 'No se pudo contactar al servidor.');
                 }
             }
         }
@@ -207,32 +234,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnEditar) {
             const idEstudiante = parseInt(btnEditar.getAttribute('data-id'));
             
-            // Buscamos los datos completos del estudiante en la memoria
             const estudiante = estudiantesActuales.find(est => est.id_estudiante === idEstudiante);
 
             if (estudiante) {
-                // Rellenamos el formulario
-                estudianteEditandoId = idEstudiante; // Activamos la bandera de edición
+                estudianteEditandoId = idEstudiante; 
 
                 const inputDocumento = document.getElementById('documento');
                 inputDocumento.value = estudiante.documento;
-                inputDocumento.setAttribute('readonly', 'true'); // Documento fijo, no se puede editar
+                inputDocumento.setAttribute('readonly', 'true'); 
                 inputDocumento.classList.add('bg-light', 'text-muted');
                 
                 document.getElementById('nombres').value = estudiante.nombres;
                 document.getElementById('apellido').value = estudiante.apellido;
                 document.getElementById('email').value = estudiante.email;
                 
-                // Formateamos la fecha para que la acepte el input HTML (YYYY-MM-DD)
                 if (estudiante.fecha_nacimiento) {
                     document.getElementById('fecha_nacimiento').value = estudiante.fecha_nacimiento.substring(0, 10);
                 }
 
-                // Transformamos visualmente el modal
                 document.querySelector('#modalNuevoEstudiante .modal-title').innerText = 'Editar Alumno';
                 document.querySelector('#formNuevoEstudiante button[type="submit"]').innerText = 'Actualizar Estudiante';
 
-                // Mostramos el modal
                 const modalElement = document.getElementById('modalNuevoEstudiante');
                 const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
                 modal.show();
@@ -241,14 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 5. LIMPIEZA AUTOMÁTICA DEL MODAL
-    // Si el usuario cierra el modal, reseteamos todo a modo "Crear"
     document.getElementById('modalNuevoEstudiante').addEventListener('hidden.bs.modal', () => {
         formNuevoEstudiante.reset();
-        estudianteEditandoId = null; // Desactivamos la bandera
+        estudianteEditandoId = null; 
         document.querySelector('#modalNuevoEstudiante .modal-title').innerText = 'Agregar Nuevo Alumno';
         document.querySelector('#formNuevoEstudiante button[type="submit"]').innerText = 'Guardar Estudiante';
 
-        // Dejamos el campo documento editable para el próximo registro (para cuando es un nuevo registro)
         const inputDocumento = document.getElementById('documento');
         inputDocumento.removeAttribute('readonly');
         inputDocumento.classList.remove('bg-light', 'text-muted');
