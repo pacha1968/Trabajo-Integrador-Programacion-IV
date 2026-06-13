@@ -1,6 +1,6 @@
 import {check} from 'express-validator';
-import {validarCampos} from './validar-campos.js';
-import inscripciones from '../repositories/inscripciones.repository.js';
+import { validarCampos } from './validarCampos.js';
+import inscripcionesRepository from '../repositories/inscripciones.repository.js'; 
 
 export const validarInscripcion = [
     check('id_curso', 'Debe enviar un ID de curso válido').isInt({ min: 1 }),
@@ -15,7 +15,7 @@ export const validarInscripcion = [
         }
 
         // Estado 2 = Inscripción Abierta
-        if (datosCurso.id_curso_estado !== 2) {
+        if (parseInt(datosCurso.id_curso_estado) !== 2) {
             throw new Error('Las inscripciones para este curso no están habilitadas actualmente');
         }
 

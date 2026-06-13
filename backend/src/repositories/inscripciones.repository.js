@@ -1,4 +1,4 @@
-import pool from '../config/database.js';
+import pool from '../config/db.js';
 
 // 1. Verifica si el curso está abierto y si tiene cupo disponible
 const verificarDisponibilidadCurso = async (id_curso) => {
@@ -20,7 +20,7 @@ const verificarInscripcionDuplicada = async (id_curso, id_estudiante) => {
         FROM inscripciones
         WHERE id_curso = $1 AND id_estudiante = $2 AND id_inscripcion_estado = 1
     `;
-    const result = await pool.query(quey, [id_curso, id_estudiante]);
+    const result = await pool.query(query, [id_curso, id_estudiante]);
     return result.rows.length > 0; // Retorna true si ya existe una inscripción activa
 }
 
@@ -30,8 +30,11 @@ const verificarInscripcionDuplicada = async (id_curso, id_estudiante) => {
 
 // B - Browse / Read: Obtener lista paginada con JOINs para traer nombres legibles
 
-const obtenerInscripciones = async (limit, offset)  => {
-    const query = `
+// B - Browse / Read: Obtener lista paginada con JOINs y Filtros
+const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') => {
+    
+    // Consulta principal para traer los datos
+    let baseQuery = `
         SELECT 
             i.id_inscripcion, 
             i.fecha_hora_inscripcion,
@@ -44,18 +47,56 @@ const obtenerInscripciones = async (limit, offset)  => {
         JOIN cursos c ON i.id_curso = c.id_curso
         JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
         JOIN inscripciones_estados ie ON i.id_inscripcion_estado = ie.id_inscripcion_estado
-        ORDER BY i.id_inscripcion DESC
-        LIMIT $1 OFFSET $2
+        WHERE 1=1
     `;
-    const result = await pool.query(query, [limit, offset]);
-    const countQuery = 'SELECT COUNT(*) FROM inscripciones';
-    const countResult = await pool.query(countQuery);
+
+    // Consulta paralela para contar el total (necesario para la paginación)
+    let countQuery = `
+        SELECT COUNT(*)
+        FROM inscripciones i
+        JOIN cursos c ON i.id_curso = c.id_curso
+        JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+        WHERE 1=1
+    `;
+
+    const queryParams = [];
+    let paramIndex = 1;
+
+    // Filtro 1: Búsqueda de Estudiante (por nombre, apellido o DNI)
+    if (estudiante) {
+        const busqueda = `%${estudiante}%`;
+        // Usamos CAST por si el documento es integer en tu BD y le aplicamos ILIKE
+        const filtroSql = ` AND (e.nombres ILIKE $${paramIndex} OR e.apellido ILIKE $${paramIndex} OR CAST(e.documento AS TEXT) ILIKE $${paramIndex})`;
+        baseQuery += filtroSql;
+        countQuery += filtroSql;
+        queryParams.push(busqueda);
+        paramIndex++;
+    }
+
+    // Filtro 2: Búsqueda por ID de Curso
+    if (curso) {
+        const filtroSql = ` AND i.id_curso = $${paramIndex}`;
+        baseQuery += filtroSql;
+        countQuery += filtroSql;
+        queryParams.push(curso);
+        paramIndex++;
+    }
+
+    // 1ro: Ejecutamos el COUNT con los filtros aplicados
+    const countResult = await pool.query(countQuery, queryParams);
+
+    // 2do: Le agregamos el ordenamiento, LIMIT y OFFSET a la consulta principal
+    baseQuery += ` ORDER BY i.id_inscripcion_estado ASC, i.id_inscripcion DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    const finalParams = [...queryParams, limit, offset];
+    
+    // Ejecutamos la consulta principal
+    const result = await pool.query(baseQuery, finalParams);
+
     return {
         data: result.rows,
         total: parseInt(countResult.rows[0].count)
     };
 }
-
 // A - Add: Crear una nueva inscripción
 const crearInscripcion = async (id_curso, id_estudiante, id_isuario_modificacion) =>  {
     const query = `
