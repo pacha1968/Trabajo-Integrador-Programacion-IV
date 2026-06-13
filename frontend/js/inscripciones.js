@@ -1,9 +1,39 @@
-// 1. Verificación de Seguridad
+// ==========================================
+// 1. CONTROL DE ACCESO, NAVBAR INTERACTIVO Y LOGOUT
+// ==========================================
 const token = localStorage.getItem('token');
 if (!token) {
-    window.location.href = 'index.html';
+    window.location.href = 'login.html'; 
 }
 
+document.addEventListener('DOMContentLoaded', async () => {
+    // Inyecta el nombre del usuario logueado en el nuevo Dropdown
+    const nombreAdmin = localStorage.getItem('userName');
+    const displayAdmin = document.getElementById('nombreUsuarioNavbar');
+    if (nombreAdmin && displayAdmin) {
+        displayAdmin.textContent = nombreAdmin;
+    }
+
+    // Escucha el clic en el botón de Cerrar Sesión del nuevo menú
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            window.location.href = 'login.html'; 
+        });
+    }
+
+    // Carga inicial de datos
+    await cargarInscripciones();
+    await cargarEstudiantesParaSelect();
+    await cargarCursosParaSelect();
+});
+
+// ==========================================
+// VARIABLES GLOBALES
+// ==========================================
 const tbodyInscripciones = document.getElementById('tbody-inscripciones');
 const paginacionContainer = document.getElementById('paginacion-container');
 const formNuevaInscripcion = document.getElementById('formNuevaInscripcion');
@@ -11,18 +41,11 @@ const selectEstudiante = document.getElementById('selectEstudiante');
 const selectCurso = document.getElementById('selectCurso');
 
 let paginaActual = 1;
-let idInscripcionSeleccionada = null; // Para el modal de baja
-
-document.addEventListener('DOMContentLoaded', async () => {
-    await cargarInscripciones();
-    await cargarEstudiantesParaSelect();
-    await cargarCursosParaSelect();
-});
+let idInscripcionSeleccionada = null; 
 
 // ==========================================
-// FUNCIONES DE CARGA Y FILTROS
+// FUNCIONES DE CARGA Y RENDERIZADO TABLA
 // ==========================================
-
 async function cargarInscripciones() {
     try {
         // Capturamos los filtros directamente del HTML
@@ -41,26 +64,12 @@ async function cargarInscripciones() {
             renderizarTabla(data.data);
             renderizarPaginacion(data.pagination);
         } else {
-            mostrarToast('Error al cargar inscripciones: ' + data.message, 'danger');
+            manejarAlerta(false, 'Error', 'Error al cargar inscripciones: ' + data.message);
         }
     } catch (error) {
-        tbodyInscripciones.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error de conexión</td></tr>';
+        tbodyInscripciones.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error de conexión con el servidor</td></tr>';
     }
 }
-
-// Evento para el botón de filtrar
-document.getElementById('btnFiltrar')?.addEventListener('click', () => {
-    paginaActual = 1; // Volvemos a la página 1 al buscar
-    cargarInscripciones();
-});
-
-// Evento para buscar rápido al apretar "Enter" en el input
-document.getElementById('filtroEstudiante')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        paginaActual = 1;
-        cargarInscripciones();
-    }
-});
 
 function renderizarTabla(inscripciones) {
     tbodyInscripciones.innerHTML = '';
@@ -102,9 +111,41 @@ function renderizarTabla(inscripciones) {
 }
 
 // ==========================================
-// LLENAR SELECTORES DINÁMICAMENTE
+// FILTROS (LIVE SEARCH)
 // ==========================================
 
+// Función Debounce: Evita saturar al servidor con peticiones por cada letra
+const debounce = (func, delay) => {
+    let temporizador;
+    return (...args) => {
+        clearTimeout(temporizador);
+        temporizador = setTimeout(() => func.apply(this, args), delay);
+    };
+};
+
+// Función centralizada para reiniciar la página y buscar
+const aplicarFiltros = () => {
+    paginaActual = 1; 
+    cargarInscripciones(); 
+};
+
+// Capturamos los inputs
+const inputFiltroEstudiante = document.getElementById('filtroEstudiante');
+const selectFiltroCurso = document.getElementById('filtroSelectCurso');
+
+// Escuchador para el texto: se activa 300ms después de que el usuario deja de tipear
+if (inputFiltroEstudiante) {
+    inputFiltroEstudiante.addEventListener('keyup', debounce(aplicarFiltros, 300));
+}
+
+// Escuchador para el selector: se activa inmediatamente al elegir otra opción
+if (selectFiltroCurso) {
+    selectFiltroCurso.addEventListener('change', aplicarFiltros);
+}
+
+// ==========================================
+// LLENAR SELECTORES DINÁMICAMENTE
+// ==========================================
 async function cargarEstudiantesParaSelect() {
     try {
         const response = await fetch('http://localhost:3000/api/estudiantes?limit=100', {
@@ -129,7 +170,9 @@ async function cargarEstudiantesParaSelect() {
 
 async function cargarCursosParaSelect() {
     try {
-        const response = await fetch('http://localhost:3000/api/cursos?limit=100');
+        const response = await fetch('http://localhost:3000/api/cursos?limit=100', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await response.json();
         
         const filtroSelectCurso = document.getElementById('filtroSelectCurso');
@@ -159,102 +202,111 @@ async function cargarCursosParaSelect() {
 }
 
 // ==========================================
-// ALTA DE INSCRIPCIÓN Y BAJA
+// ALERTAS UNIFICADAS CON SWEETALERT2
 // ==========================================
-
-formNuevaInscripcion.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const id_estudiante = parseInt(selectEstudiante.value);
-    const id_curso = parseInt(selectCurso.value);
-
-    if (isNaN(id_estudiante) || isNaN(id_curso)) {
-        mostrarToast('Por favor, seleccione un estudiante y un curso.', 'danger');
-        return;
-    }
-
-    try {
-        const response = await fetch('http://localhost:3000/api/inscripciones', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ id_estudiante, id_curso })
+const manejarAlerta = (esExitoso, titulo, mensaje) => {
+    if (esExitoso) {
+        Swal.fire({
+            icon: 'success',
+            title: titulo,
+            text: mensaje || 'Operación realizada correctamente.',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
         });
-
-        const data = await response.json();
-
-        if (data.success) {
-            const modalElement = document.getElementById('modalNuevaInscripcion');
-            bootstrap.Modal.getInstance(modalElement).hide();
-            formNuevaInscripcion.reset();
-            cargarInscripciones();
-            mostrarToast('¡Inscripción registrada con éxito!', 'success');
-        } else {
-            let mensajeError = data.message;
-            if (data.errors && data.errors.length > 0) {
-                mensajeError = data.errors[0].msg;
-            }
-            mostrarToast('Error: ' + mensajeError, 'danger');
-        }
-    } catch (error) {
-        mostrarToast('Ocurrió un error al registrar la inscripción.', 'danger');
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: titulo || 'Ocurrió un problema',
+            text: mensaje || 'Error de conexión con el servidor.',
+            confirmButtonColor: '#0056b3'
+        });
     }
-});
-
-
-window.abrirModalBaja = function(id) {
-    idInscripcionSeleccionada = id;
-    const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
-    modal.show();
 };
 
-const btnConfirmarBaja = document.getElementById('btnConfirmarBaja');
+// ==========================================
+// ALTA DE INSCRIPCIÓN Y BAJA
+// ==========================================
+if (formNuevaInscripcion) {
+    formNuevaInscripcion.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-if (btnConfirmarBaja) {
-    btnConfirmarBaja.addEventListener('click', async () => {
-        if (!idInscripcionSeleccionada) return;
+        const id_estudiante = parseInt(selectEstudiante.value);
+        const id_curso = parseInt(selectCurso.value);
+
+        if (isNaN(id_estudiante) || isNaN(id_curso)) {
+            manejarAlerta(false, 'Datos incompletos', 'Por favor, seleccione un estudiante y un curso.');
+            return;
+        }
 
         try {
-            const response = await fetch(`http://localhost:3000/api/inscripciones/${idInscripcionSeleccionada}`, {
+            const response = await fetch('http://localhost:3000/api/inscripciones', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ id_estudiante, id_curso })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('modalNuevaInscripcion')).hide();
+                formNuevaInscripcion.reset();
+                cargarInscripciones();
+                manejarAlerta(true, '¡Excelente!', 'La inscripción fue registrada correctamente.');
+            } else {
+                let mensajeError = data.message;
+                if (data.errors && data.errors.length > 0) {
+                    mensajeError = data.errors[0].msg;
+                }
+                manejarAlerta(false, 'No se pudo inscribir', mensajeError);
+            }
+        } catch (error) {
+            manejarAlerta(false, 'Error crítico', 'Ocurrió un error al registrar la inscripción.');
+        }
+    });
+}
+
+// NUEVA BAJA LÓGICA CON SWEETALERT
+window.abrirModalBaja = async function(id) {
+    const confirmacion = await Swal.fire({
+        title: '¿Anular inscripción?', 
+        text: "La inscripción cambiará a estado Cancelada y liberará el cupo.",
+        icon: 'warning', 
+        showCancelButton: true, 
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d', 
+        confirmButtonText: 'Sí, anular', 
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true // Consistencia visual con el módulo de Cursos
+    });
+
+    if (confirmacion.isConfirmed) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/inscripciones/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             const data = await response.json();
-            bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
 
             if (data.success) {
-                mostrarToast('Inscripción anulada correctamente.', 'success');
+                manejarAlerta(true, '¡Anulada!', 'Inscripción cancelada exitosamente.');
                 cargarInscripciones();
             } else {
-                mostrarToast('Error: ' + data.message, 'danger');
+                manejarAlerta(false, 'Error', data.message);
             }
         } catch (error) {
-            bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
-            mostrarToast('Error de conexión al anular.', 'danger');
+            manejarAlerta(false, 'Error crítico', 'Error de conexión al anular.');
         }
-    });
-}
+    }
+};
 
 // ==========================================
-// UTILIDADES Y PAGINACIÓN
+// PAGINACIÓN Y PDF
 // ==========================================
-
-function mostrarToast(mensaje, tipo) {
-    const toastElement = document.getElementById('toastNotificacion');
-    if (!toastElement) return;
-    const toastMensaje = document.getElementById('toastMensaje');
-    const toast = new bootstrap.Toast(toastElement);
-    
-    toastElement.classList.remove('text-bg-success', 'text-bg-danger');
-    toastElement.classList.add(`text-bg-${tipo}`);
-    toastMensaje.textContent = mensaje;
-    
-    toast.show();
-}
-
 function renderizarPaginacion(pagination) {
     if (pagination.totalItems === 0) {
         paginacionContainer.innerHTML = '';
@@ -290,5 +342,5 @@ window.cambiarPagina = function(nuevaPagina) {
 };
 
 window.generarPDF = function(id) {
-    mostrarToast(`Próximamente: PDF de inscripción #${id}`, 'success');
+    manejarAlerta(true, 'Próximamente', `PDF de inscripción #${id} en desarrollo.`);
 };

@@ -1,35 +1,53 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. EL VIGILANTE FRONTEND
+    // ==========================================
+    // 1. SEGURIDAD, USUARIO Y CIERRE DE SESIÓN
+    // ==========================================
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = 'login.html'; // O tu vista de login
         return;
     }
 
-    // ¡RESCATAMOS TU LÓGICA! Mostrar el nombre del usuario logueado en la esquina
+    // Mostrar el nombre del usuario logueado en el nuevo header interactivo
     const nombreAdmin = localStorage.getItem('userName');
-    const displayAdmin = document.querySelector('.text-white.text-end span');
+    const displayAdmin = document.getElementById('nombreUsuarioNavbar');
     if (nombreAdmin && displayAdmin) {
         displayAdmin.textContent = nombreAdmin;
     }
 
+    // Funcionalidad del botón Cerrar Sesión (Igual que en los otros módulos)
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            window.location.href = 'login.html'; // O tu vista de login
+        });
+    }
+
+    // ==========================================
     // 2. CONFIGURAR LA FECHA ACTUAL
+    // ==========================================
     const mostrarFecha = () => {
         const opciones = { day: 'numeric', month: 'long', year: 'numeric' };
         const fecha = new Date().toLocaleDateString('es-ES', opciones);
-        document.getElementById('fechaActual').textContent = fecha;
+        const elementoFecha = document.getElementById('fechaActual');
+        if (elementoFecha) elementoFecha.textContent = fecha;
     };
     mostrarFecha();
 
+    // ==========================================
     // 3. OBTENER LAS ESTADÍSTICAS DEL BACKEND
+    // ==========================================
     const cargarDashboard = async () => {
         try {
             const response = await fetch('http://localhost:3000/api/stats', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Sumamos el token para que nos dejen pasar
+                    'Authorization': `Bearer ${token}` 
                 }
             });
 
@@ -43,21 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Rellenamos la tabla de cursos rápidos
                 const tablaCursos = document.getElementById('tablaCursosRapidos');
-                tablaCursos.innerHTML = ''; // Limpiamos los datos de prueba
+                if (tablaCursos) {
+                    tablaCursos.innerHTML = ''; // Limpiamos los datos de prueba
 
-                if (data.data.cursosRapidos && data.data.cursosRapidos.length > 0) {
-                    data.data.cursosRapidos.forEach(curso => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="fw-bold text-primary">${curso.nombre}</td>
-                            <td class="text-end">
-                                <a href="cursos.html" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ir a Cursos</a>
-                            </td>
-                        `;
-                        tablaCursos.appendChild(tr);
-                    });
-                } else {
-                    tablaCursos.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No hay cursos activos recientes.</td></tr>';
+                    if (data.data.cursosRapidos && data.data.cursosRapidos.length > 0) {
+                        data.data.cursosRapidos.forEach(curso => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="fw-bold text-primary">${curso.nombre}</td>
+                                <td class="text-end">
+                                    <a href="cursos.html" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ir a Cursos</a>
+                                </td>
+                            `;
+                            tablaCursos.appendChild(tr);
+                        });
+                    } else {
+                        tablaCursos.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No hay cursos activos recientes.</td></tr>';
+                    }
                 }
             } else {
                 console.error("Error del servidor:", data.message);

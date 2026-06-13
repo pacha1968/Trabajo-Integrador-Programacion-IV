@@ -5,15 +5,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return texto.toLowerCase().split(' ').map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1)).join(' ');
     };
 
-    // 1. EL VIGILANTE FRONTEND: Verificamos si hay token
+    // ==========================================
+    // CONTROL DE ACCESO, NAVBAR INTERACTIVO Y LOGOUT
+    // ==========================================
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = 'login.html'; 
         return;
     }
 
+    // Inyecta el nombre del usuario logueado en el nuevo Dropdown
+    const nombreAdmin = localStorage.getItem('userName');
+    const displayAdmin = document.getElementById('nombreUsuarioNavbar');
+    if (nombreAdmin && displayAdmin) {
+        displayAdmin.textContent = nombreAdmin;
+    }
+
+    // Escucha el clic en el botón de Cerrar Sesión del nuevo menú
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            window.location.href = 'login.html';
+        });
+    }
+    // ==========================================
+
     const tablaEstudiantes = document.getElementById('tabla-estudiantes');
     const formNuevoEstudiante = document.getElementById('formNuevoEstudiante');
+    const inputBusqueda = document.getElementById('inputBusqueda');
+    const contenedorPaginacion = document.getElementById('paginacion-container');
     
     // Variables globales para la paginación, filtrado y edición
     let paginaActual = 1;
@@ -21,16 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let busquedaActual = '';
     let estudianteEditandoId = null; // null = Modo Crear | ID = Modo Editar
     let estudiantesActuales = []; // Guardamos los datos en memoria para leerlos rápido al editar
-
-    const inputBusqueda = document.getElementById('inputBusqueda');
-    // ACTUALIZADO: Apuntamos al nuevo contenedor que creaste en el HTML
-    const contenedorPaginacion = document.getElementById('paginacion-container');
-    
-    const nombreAdmin = localStorage.getItem('userName');
-    const displayAdmin = document.querySelector('.text-white.text-end span');
-    if (nombreAdmin && displayAdmin) {
-        displayAdmin.textContent = nombreAdmin;
-    }
 
     // ==========================================
     // ALERTAS UNIFICADAS CON SWEETALERT2

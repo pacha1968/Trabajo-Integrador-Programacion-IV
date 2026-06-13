@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // ==========================================
-    // 1. SEGURIDAD: VIGILANTE Y NOMBRE DEL ADMIN
+    // CONTROL DE ACCESO, NAVBAR INTERACTIVO Y LOGOUT
     // ==========================================
     const token = localStorage.getItem('token');
     if (!token) {
@@ -10,19 +10,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const nombreAdmin = localStorage.getItem('userName');
-    const displayAdmin = document.querySelector('.text-white.text-end span');
+    const displayAdmin = document.getElementById('nombreUsuarioNavbar');
     if (nombreAdmin && displayAdmin) {
         displayAdmin.textContent = nombreAdmin;
     }
 
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('userName');
+            window.location.href = 'login.html'; 
+        });
+    }
+
+    // ==========================================
+    // VARIABLES GLOBALES
+    // ==========================================
     const tablaCursos = document.getElementById('tabla-cursos');
     const formNuevoCurso = document.getElementById('formNuevoCurso');
     const formEditarCurso = document.getElementById('formEditarCurso');
-    const btnConfirmarBaja = document.getElementById('btnConfirmarBaja');
 
     let cursosCache = [];
     let paginaActual = 1;
-    let idCursoSeleccionado = null;
 
     const formatearFecha = (fechaString) => {
         if (!fechaString) return '-';
@@ -51,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'error',
                 title: 'Ocurrió un problema',
                 text: mensaje || 'Error de conexión con el servidor.',
-                confirmButtonColor: '#0056b3' // Usamos tu azul UNER
+                confirmButtonColor: '#0056b3' 
             });
         }
     };
@@ -109,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 2:
                     estadoTexto = 'Inscripción Abierta';
-                    badgeClass = 'bg-success-subtle text-success';     
+                    badgeClass = 'bg-success-subtle text-success';    
                     break;
                 case 3: 
                     estadoTexto = 'Inscripción Cerrada';
@@ -153,9 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (btnEliminar) {
             const id = parseInt(btnEliminar.getAttribute('data-id'));
-            idCursoSeleccionado = id;
-            const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
-            modal.show();
+            eliminarCurso(id); 
         }
     });
 
@@ -217,12 +226,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await response.json();
-                manejarAlerta(data.success, '¡Curso creado!', data.message);
-
+                
                 if (data.success) {
                     formNuevoCurso.reset();
-                    bootstrap.Modal.getInstance(document.getElementById('modalNuevoCurso')).hide();
+                    // Cierre del modal seguro para evitar errores de Backdrop
+                    const modalEl = document.getElementById('modalNuevoCurso');
+                    const modalInst = bootstrap.Modal.getInstance(modalEl);
+                    if(modalInst) modalInst.hide();
+                    
+                    manejarAlerta(true, '¡Curso creado!', data.message);
                     cargarCursos(); 
+                } else {
+                    manejarAlerta(false, 'Error al crear', data.message);
                 }
             } catch (error) {
                 console.error('Error en la petición:', error);
@@ -296,10 +311,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await response.json();
-                bootstrap.Modal.getInstance(document.getElementById('modalEditarCurso')).hide();
-                manejarAlerta(data.success, '¡Curso actualizado!', data.message);
-
-                if (data.success) cargarCursos();
+                
+                // Cierre del modal seguro
+                const modalEl = document.getElementById('modalEditarCurso');
+                const modalInst = bootstrap.Modal.getInstance(modalEl);
+                if(modalInst) modalInst.hide();
+                
+                if (data.success) {
+                    manejarAlerta(true, '¡Curso actualizado!', data.message);
+                    cargarCursos();
+                } else {
+                    manejarAlerta(false, 'Error', data.message);
+                }
             } catch (error) {
                 console.error('Error al actualizar:', error);
                 manejarAlerta(false, 'Error crítico', 'No se pudo conectar con el servidor.');
@@ -308,35 +331,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 5. ELIMINAR CURSO (DELETE)
+    // 5. ELIMINAR CURSO (DELETE CON SWEETALERT)
     // ==========================================
-    if (btnConfirmarBaja) {
-        btnConfirmarBaja.addEventListener('click', async () => {
-            if (!idCursoSeleccionado) return;
+    const eliminarCurso = async (id) => {
+        const confirmacion = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Vas a dar de baja este curso. Pasará a estado eliminado.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        });
 
+        if (confirmacion.isConfirmed) {
             try {
-                const response = await fetch(`http://localhost:3000/api/cursos/${idCursoSeleccionado}`, {
+                const response = await fetch(`http://localhost:3000/api/cursos/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const data = await response.json();
-                bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminar')).hide();
-                manejarAlerta(data.success, '¡Curso eliminado!', data.message);
 
-                if (data.success) cargarCursos(); 
+                if (data.success) {
+                    manejarAlerta(true, '¡Curso eliminado!', data.message);
+                    cargarCursos(); 
+                } else {
+                    manejarAlerta(false, 'No se pudo eliminar', data.message);
+                }
             } catch (error) {
                 console.error('Error al eliminar:', error);
                 manejarAlerta(false, 'Error crítico', 'No se pudo conectar con el servidor.');
             }
-        });
-    }
+        }
+    };
 
-// ==========================================
+    // ==========================================
     // 6. FILTROS Y PAGINACIÓN (LIVE SEARCH)
     // ==========================================
-    
-    // Función Debounce: Evita saturar al servidor con peticiones por cada letra
     const debounce = (func, delay) => {
         let temporizador;
         return (...args) => {
@@ -345,23 +379,18 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
-    // Función centralizada para reiniciar la página y buscar
     const aplicarFiltros = () => {
         paginaActual = 1; 
         cargarCursos(); 
     };
 
-    // Capturamos los inputs del filtro
     const inputFiltroNombre = document.getElementById('filtroNombre');
     const selectFiltroEstado = document.getElementById('filtroEstado');
     const inputFiltroFecha = document.getElementById('filtroFecha');
 
-    // Escuchador para el texto: se activa 300ms después de que deja de tipear
     if (inputFiltroNombre) {
         inputFiltroNombre.addEventListener('keyup', debounce(aplicarFiltros, 300));
     }
-    
-    // Escuchadores para los selectores: se activan inmediatamente al cambiar el valor
     if (selectFiltroEstado) {
         selectFiltroEstado.addEventListener('change', aplicarFiltros);
     }
@@ -369,11 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
         inputFiltroFecha.addEventListener('change', aplicarFiltros);
     }
 
-    // Paginación estandarizada (Idéntica a la de Estudiantes)
     const renderizarBotonesPaginacion = (pagination) => {
         let contenedor = document.getElementById('paginacion-container');
         
-        // Si el contenedor no existe en el HTML, lo creamos dinámicamente
         if (!contenedor) {
             contenedor = document.createElement('div');
             contenedor.id = 'paginacion-container';
@@ -389,7 +416,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const ul = document.createElement('ul');
         ul.className = 'pagination pagination-sm m-0 shadow-sm'; 
 
-        // Botón Anterior
         const liAnterior = document.createElement('li');
         liAnterior.className = `page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`;
         liAnterior.innerHTML = `<button class="page-link border-0"><i class="bi bi-chevron-left"></i> Anterior</button>`;
@@ -401,13 +427,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         ul.appendChild(liAnterior);
 
-        // Indicador de posición
         const liInfo = document.createElement('li');
         liInfo.className = 'page-item disabled';
         liInfo.innerHTML = `<span class="page-link border-0 text-dark fw-semibold mx-2">Página ${pagination.currentPage} de ${pagination.totalPages}</span>`;
         ul.appendChild(liInfo);
 
-        // Botón Siguiente
         const liSiguiente = document.createElement('li');
         liSiguiente.className = `page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`;
         liSiguiente.innerHTML = `<button class="page-link border-0 text-primary">Siguiente <i class="bi bi-chevron-right"></i></button>`;
@@ -423,6 +447,5 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedor.appendChild(nav);
     };
 
-    // Ejecución inicial automática
     cargarCursos();
 });
