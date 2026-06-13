@@ -1,9 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
 :root {
     --azul-uner: #0056b3;
+    --fondo-gris: #f8f9fa; /* Sumamos este color para el fondo general */
 }
 
 body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* Priorizamos Inter, pero dejamos las tuyas como respaldo de seguridad */
+    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--fondo-gris);
 }
 
 /* Color principal de Bootstrap sobrescrito */
@@ -32,3 +37,16 @@ body {
     transform: translateY(-5px);
 }
 
+/* NUEVO: Estandarizamos todas las tablas del sistema */
+.table {
+    background-color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table thead {
+    background-color: #f1f4f8;
+    color: var(--azul-uner);
+    font-weight: 600;
+}

@@ -71,14 +71,17 @@
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                     <div class="card-body">
                         <form class="row g-3" id="formFiltros">
-                            <div class="col-md-4" >
+                            <div class="col-md-5">
                                 <label class="form-label small fw-bold">Buscar por Nombre</label>
-                                <input type="text" id="filtroNombre" class="form-control" placeholder="Ej: Programación IV">
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                    <input type="text" id="filtroNombre" class="form-control border-start-0" placeholder="Ej: Programación IV...">
+                                </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label class="form-label small fw-bold">Estado</label>
-                                <select class="form-select" id="filtroEstado">
-                                    <option value="">Todos</option>
+                                <select class="form-select shadow-sm" id="filtroEstado">
+                                    <option value="">Todos los estados</option>
                                     <option value="1">Borradores</option>
                                     <option value="2">Inscripción Abierta</option>
                                     <option value="3">Inscripción Cerrada</option>
@@ -86,12 +89,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold">Fecha Inicio</label>
-                                <input type="date" class="form-control" id="filtroFecha">
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-secondary w-100" id="btnFiltrar">
-                                    <i class="bi bi-search me-1"></i> Filtrar
-                                </button>
+                                <input type="date" class="form-control shadow-sm" id="filtroFecha">
                             </div>
                         </form>
                     </div>
@@ -243,19 +241,9 @@
             </div>
         </div>
     </div>
-    <!-- CONTENEDOR DEL TOAST (NOTIFICACIÓN) -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="toastNotificacion" class="toast align-items-center border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body text-white fw-bold" id="toastMensaje">
-                    <!-- El mensaje se inyecta desde JS -->
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
+    
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/cursos.js"></script>
 </body>
 </html>
