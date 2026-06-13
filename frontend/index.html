@@ -69,69 +69,113 @@
             </nav>
 
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 bg-light min-vh-100">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h2 class="h3 fw-bold text-secondary">Panel de Control</h2>
-                </div>
-
-                <div class="row g-4 mb-4">
-                    <div class="col-12 col-sm-6 col-xl-4">
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-4 me-3">
-                                        <i class="bi bi-person-badge text-warning h3 mb-0"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="text-muted mb-1">Estudiantes Activos</h6>
-                                        <h3 class="fw-bold mb-0">124</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-0">Panel de Control</h2>
+                        <p class="text-muted small mt-1 mb-0">Resumen general del Sistema de Gestión Académica</p>
                     </div>
-
-                    <div class="col-12 col-sm-6 col-xl-4">
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded-4 me-3">
-                                        <i class="bi bi-journal-check text-success h3 mb-0"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="text-muted mb-1">Cursos Disponibles</h6>
-                                        <h3 class="fw-bold mb-0">18</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-xl-4">
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-body p-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded-4 me-3">
-                                        <i class="bi bi-person-badge text-warning h3 mb-0"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="text-muted mb-1">Inscripciones Hoy</h6>
-                                        <h3 class="fw-bold mb-0">32</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="badge bg-primary px-3 py-2 fs-6 shadow-sm">
+                        <i class="bi bi-calendar3 me-2"></i><span id="fechaActual">12 de Junio de 2026</span>
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 mt-4">
-                    <div class="card-header bg-white py-3 border-0 rounded-top-4">
-                        <h5 class="fw-bold m-0">Acciones Rápidas</h5>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 border-start border-primary border-4">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted fw-bold mb-1 small text-uppercase">Estudiantes Activos</p>
+                                    <h3 class="fw-bold mb-0 text-dark" id="totalEstudiantes">-</h3>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                                    <i class="bi bi-people-fill fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p class="text-muted">Bienvenido al sistema. Utilice el menú lateral para gestionar los recursos académicos.</p>
-                        <div class="d-flex gap-2">
-                            <a href="inscripciones.html" class="btn btn-outline-primary btn-sm">Nueva Inscripción</a>
-                            <a href="estudiantes.html" class="btn btn-outline-secondary btn-sm">Agregar Estudiante</a>
+
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 border-start border-success border-4">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted fw-bold mb-1 small text-uppercase">Cursos Disponibles</p>
+                                    <h3 class="fw-bold mb-0 text-dark" id="totalCursos">-</h3>
+                                </div>
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+                                    <i class="bi bi-journal-bookmark-fill fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 p-3 border-start border-warning border-4">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted fw-bold mb-1 small text-uppercase">Inscripciones Totales</p>
+                                    <h3 class="fw-bold mb-0 text-dark" id="totalInscripciones">-</h3>
+                                </div>
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                                    <i class="bi bi-card-checklist fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                                <h5 class="fw-bold text-dark"><i class="bi bi-lightning-charge text-warning me-2"></i>Accesos Rápidos: Cursos Activos</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light text-muted small text-uppercase">
+                                            <tr>
+                                                <th>Nombre del Curso</th>
+                                                <th class="text-end">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tablaCursosRapidos">
+                                            <tr>
+                                                <td class="fw-bold text-primary">Programación Web Fullstack</td>
+                                                <td class="text-end"><a href="cursos.html" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ir a Cursos</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary">Base de Datos Avanzada</td>
+                                                <td class="text-end"><a href="cursos.html" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ir a Cursos</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-primary">Ingeniería de Software</td>
+                                                <td class="text-end"><a href="cursos.html" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ir a Cursos</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white" style="background-image: linear-gradient(135deg, #0d6efd 0%, #002147 100%);">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4"><i class="bi bi-rocket-takeoff me-2"></i>Gestión Rápida</h5>
+                                <p class="small text-white-50 mb-4">Accesos directos para agilizar las tareas administrativas de hoy.</p>
+                                
+                                <div class="d-grid gap-3">
+                                    <a href="inscripciones.html" class="btn btn-light text-primary fw-bold text-start p-3 rounded-3 shadow-sm d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-person-plus-fill me-2"></i> Nueva Inscripción</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                    <a href="estudiantes.html" class="btn btn-outline-light fw-bold text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-person-badge me-2"></i> Agregar Estudiante</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -143,6 +187,3 @@
     <script src="js/index.js"></script>
 </body>
 </html>
-</body>
-</html>
-

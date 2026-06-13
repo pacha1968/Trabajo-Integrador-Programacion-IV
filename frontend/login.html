@@ -3,57 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA - Iniciar Sesión</title>
-    
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styless.css">
+    <title>SGT - Iniciar Sesión</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 para las alertas lindas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
-<body class="bg-light"> 
-    
-    <div class="container">
-        <div class="row vh-100 align-items-center justify-content-center">
-            
-            <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-                <div class="card shadow-lg border-0 rounded-4">
-                    <div class="card-body p-5">
-                        
-                        <div class="text-center mb-4">
-                            <img src="img/logo2.png" alt="Logo SGA" class="img-fluid" style="max-height: 100px;">
-                        </div>
-                        <h2 class="text-center h4 mb-4 fw-bold">Iniciar Sesión</h2>
-
-                        <form>
-                            <div class="mb-3">
-                                <label for="usuario" class="form-label small fw-bold">Usuario</label>
-                                <input type="text" class="form-control form-control-lg border-2" id="usuario" placeholder="Ej: admin123" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="password" class="form-label small fw-bold">Contraseña</label>
-                                <input type="password" class="form-control form-control-lg border-2" id="password" placeholder="••••••••" required>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg fw-bold rounded-3 shadow-sm">
-                                    Ingresar al Sistema
-                                </button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
+<body>
+    <div class="container-fluid vh-100">
+        <div class="row h-100">
+            <div class="col-md-6 d-none d-md-block p-0" style="background: url('img/Gemini_Generated_Image_50qflg50qflg50qf.png') center/cover no-repeat; position: relative;">
                 
-                <p class="text-center text-muted mt-4 small">
-                    &copy; 2026 - SGT - GESTION ACADEMICA
-                </p>
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 33, 71, 0.75);"></div>
+                
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white" style="position: relative; z-index: 1;">
+                    <h1 class="display-3 fw-bold mb-3">SGT</h1>
+                    <p class="fs-4 fw-light">Sistema de Gestión Académica</p>
+                </div>
             </div>
 
+            <div class="col-md-6 d-flex justify-content-center align-items-center bg-white">
+                <div style="width: 100%; max-width: 400px; padding: 20px;">
+                    
+                    <div class="text-center mb-5">
+                        <i class="bi bi-mortarboard-fill" style="font-size: 4rem; color: #002147;"></i>
+                        <h2 class="fw-bold text-dark mt-3">¡Hola de nuevo!</h2>
+                        <p class="text-muted">Ingresá tus credenciales para continuar</p>
+                    </div>
+
+                    <form id="formLogin">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small">Usuario</label>
+                            <input type="text" class="form-control form-control-lg bg-light border-0" id="usuario" placeholder="Ej: lbianchi" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small">Contraseña</label>
+                            <input type="password" class="form-control form-control-lg bg-light border-0" id="password" placeholder="••••••••" required>
+                        </div>
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" style="background-color: #002147; border-color: #002147;">Ingresar al Sistema</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-5 text-muted small">
+                        &copy; 2026 - SGT - GESTIÓN ACADÉMICA
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="js/login.js"></script>
-    
+    <script src="js/login.js"></script> 
 </body>
 </html>

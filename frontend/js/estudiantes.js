@@ -31,7 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inputBusqueda = document.getElementById('inputBusqueda');
     const contenedorPaginacion = document.querySelector('.pagination');
-
+    
+    const nombreAdmin = localStorage.getItem('userName');
+    const displayAdmin = document.querySelector('.text-white.text-end span');
+    if (nombreAdmin && displayAdmin) {
+        displayAdmin.textContent = nombreAdmin;
+    }
+    
     // Escuchamos el buscador
     inputBusqueda.addEventListener('keyup', (e) => {
         busquedaActual = e.target.value;
