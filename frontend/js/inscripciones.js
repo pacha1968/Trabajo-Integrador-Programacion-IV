@@ -341,6 +341,49 @@ window.cambiarPagina = function(nuevaPagina) {
     cargarInscripciones(); 
 };
 
-window.generarPDF = function(id) {
-    manejarAlerta(true, 'Próximamente', `PDF de inscripción #${id} en desarrollo.`);
+window.generarPDF = async function(id) {
+    try {
+        // 1. Mostramos una alerta de carga amigable
+        Swal.fire({
+            title: 'Generando diploma...',
+            text: 'Preparando el certificado, por favor esperá.',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        // 2. Le pegamos al backend enviando el token de seguridad
+        const response = await fetch(`http://localhost:3000/api/inscripciones/${id}/diploma`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}` 
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Error en el servidor al generar el PDF');
+        }
+
+        // 3. Convertimos la respuesta binaria en un archivo temporal (Blob)
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        // 4. Truco de JS: Creamos un link invisible, le hacemos clic y lo destruimos
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Diploma_Inscripcion_${id}.pdf`; // Nombre del archivo que se descarga
+        document.body.appendChild(link);
+        link.click();
+        
+        // Limpiamos la basura
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        // Cerramos la alerta de carga
+        Swal.close();
+        manejarAlerta(true, '¡Éxito!', 'El diploma se descargó correctamente.');
+
+    } catch (error) {
+        console.error(error);
+        manejarAlerta(false, 'Error', 'No se pudo generar o descargar el diploma.');
+    }
 };

@@ -75,9 +75,47 @@ const actualizarCurso = async (id, datos) => {
 }
 
 
+const obtenerDatosParaReporte = async (idCurso) => {
+    // 1. Buscamos los detalles del curso
+    const queryCurso = `
+        SELECT id_curso, nombre, cantidad_horas, inscriptos_max
+        FROM cursos
+        WHERE id_curso = $1
+    `;
+    const resultCurso = await pool.query(queryCurso, [idCurso]);
+    
+    if (resultCurso.rows.length === 0) return null;
+
+    const curso = resultCurso.rows[0];
+
+    // 2. Buscamos los estudiantes activos inscritos en este curso
+    const queryAlumnos = `
+        SELECT e.documento, e.nombres, e.apellido, e.email
+        FROM inscripciones i
+        JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+        WHERE i.id_curso = $1 AND i.id_inscripcion_estado = 1
+        ORDER BY e.apellido ASC, e.nombres ASC
+    `;
+    const resultAlumnos = await pool.query(queryAlumnos, [idCurso]);
+
+    // Devolvemos un solo objeto con los datos del curso y la lista de estudiantes integrada
+    return {
+        id_curso: curso.id_curso,
+        nombre: curso.nombre,
+        cantidad_horas: curso.cantidad_horas,
+        inscriptos_max: curso.inscriptos_max,
+        total_inscriptos: resultAlumnos.rows.length,
+        estudiantes: resultAlumnos.rows // Array para el {{#each}} de Handlebars
+    };
+};
+
+
+
+
 export default{
     obtenerCursos,
     crearCurso,
     eliminarCurso,
-    actualizarCurso
+    actualizarCurso,
+    obtenerDatosParaReporte
 }

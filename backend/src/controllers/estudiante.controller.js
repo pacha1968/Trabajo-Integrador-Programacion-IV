@@ -92,5 +92,5 @@ export default {
     obtenerEstudiantes,
     crearEstudiante,
     eliminarEstudiante,
-    actualizarEstudiante
+    actualizarEstudiante,
 };

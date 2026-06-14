@@ -142,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${curso.inscriptos_max} alumnos</td>
                 <td><span class="badge ${badgeClass} rounded-pill px-3">${estadoTexto}</span></td>
                 <td class="text-center">
+                    <button onclick="generarReporteCurso(${curso.id_curso})" class="btn btn-sm btn-outline-dark border-0 me-1" title="Descargar Lista de Alumnos">
+                        <i class="bi bi-file-earmark-bar-graph-fill text-primary"></i>
+                    </button>
+
                     <button class="btn btn-sm btn-outline-primary border-0 me-1 btn-editar" data-id="${curso.id_curso}" title="Editar">
                         <i class="bi bi-pencil-square"></i>
                     </button>
@@ -229,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.success) {
                     formNuevoCurso.reset();
-                    // Cierre del modal seguro para evitar errores de Backdrop
                     const modalEl = document.getElementById('modalNuevoCurso');
                     const modalInst = bootstrap.Modal.getInstance(modalEl);
                     if(modalInst) modalInst.hide();
@@ -312,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
                 
-                // Cierre del modal seguro
                 const modalEl = document.getElementById('modalEditarCurso');
                 const modalInst = bootstrap.Modal.getInstance(modalEl);
                 if(modalInst) modalInst.hide();
@@ -445,6 +447,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
         nav.appendChild(ul);
         contenedor.appendChild(nav);
+    };
+
+
+    // ==========================================
+    // 7. GENERACIÓN DE REPORTE PDF
+    // ==========================================
+    window.generarReporteCurso = async function(id) {
+        try {
+            Swal.fire({
+                title: 'Generando reporte...',
+                text: 'Buscando inscriptos y armando el documento.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const response = await fetch(`http://localhost:3000/api/cursos/${id}/reporte`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}` 
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en el servidor al generar el reporte');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Reporte_Inscriptos_Curso_${id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            Swal.close();
+            
+            Swal.fire({
+                icon: 'success',
+                title: '¡Descargado!',
+                text: 'El listado se descargó correctamente.',
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo generar el reporte del curso.'
+            });
+        }
     };
 
     cargarCursos();

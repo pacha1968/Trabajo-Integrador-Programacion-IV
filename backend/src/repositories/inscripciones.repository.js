@@ -125,10 +125,30 @@ const cancelarInscripcion = async (id_inscripcion, id_usuario_modificacion) => {
     return result.rows[0];
 }
 
+const obtenerDatosParaDiploma = async (idInscripcion) => {
+    // CORRECCIÓN: Usar pool.query y $1 en lugar de db.query y ?
+    const query = `
+        SELECT i.id_inscripcion, e.nombres, e.apellido, e.documento, c.nombre AS curso_nombre, c.cantidad_horas
+        FROM inscripciones i
+        JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+        JOIN cursos c ON i.id_curso = c.id_curso
+        WHERE i.id_inscripcion = $1
+    `;
+    
+    const result = await pool.query(query, [idInscripcion]);
+
+    // CORRECCIÓN: PostgreSQL devuelve los datos dentro del array result.rows
+    return result.rows[0] || null;
+};
+
+
+
+
 export default {
     verificarDisponibilidadCurso,
     verificarInscripcionDuplicada,
     obtenerInscripciones,
     crearInscripcion,
-    cancelarInscripcion
+    cancelarInscripcion,
+    obtenerDatosParaDiploma 
 }
