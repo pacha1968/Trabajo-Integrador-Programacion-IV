@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const valEmail = inputEmail.value.trim();
         const valFechaNac = inputFechaNac.value;
 
-        const regexDNI = /^\d{7,8}$/;
+        const regexDNI = /^[1-9]\d{6,7}$/;
         if (!regexDNI.test(valDocumento)) {
             inputDocumento.classList.add('is-invalid');
             esValido = false;

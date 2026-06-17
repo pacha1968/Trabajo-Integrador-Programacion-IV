@@ -27,12 +27,37 @@ const listar = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
 };
+
 const crear = async (req, res) => {
     try {
         const { id_curso, id_estudiante } = req.body;
-        
-        // Sacamos el ID del usuario directamente del Token JWT 
-        const id_usuario_modificacion = req.usuario.id;
+        const id_usuario_modificacion = req.usuario?.id || 1;
+        const esDuplicada = await inscripcionesRepository.verificarInscripcionDuplicada(id_curso, id_estudiante);
+        if (esDuplicada) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'El estudiante ya se encuentra inscripto y activo en este curso.' 
+            });
+        }
+
+        const disponibilidad = await inscripcionesRepository.verificarDisponibilidadCurso(id_curso);
+        if (!disponibilidad) {
+            return res.status(404).json({ success: false, message: 'El curso especificado no existe.' });
+        }
+
+        if (disponibilidad.id_curso_estado !== 2) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No es posible registrar inscripciones. El curso no se encuentra en estado de Inscripción Abierta.' 
+            });
+        }
+
+        if (parseInt(disponibilidad.inscriptos_actuales) >= parseInt(disponibilidad.inscriptos_max)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Cupo máximo alcanzado. El límite de este curso es de ${disponibilidad.inscriptos_max} alumnos.` 
+            });
+        }
 
         const nuevaInscripcion = await inscripcionesRepository.crearInscripcion(id_curso, id_estudiante, id_usuario_modificacion);
 
@@ -50,7 +75,7 @@ const crear = async (req, res) => {
 const eliminar = async (req, res) => {
     try {
         const { id } = req.params; 
-        const id_usuario_modificacion = req.usuario.id; 
+        const id_usuario_modificacion = req.usuario?.id || 1; 
 
         const inscripcionCancelada = await inscripcionesRepository.cancelarInscripcion(id, id_usuario_modificacion);
 
@@ -69,15 +94,13 @@ const eliminar = async (req, res) => {
     }
 };
 
-
-
 const descargarDiploma = async (req, res) => {
     const idInscripcion = req.params.id;
 
-    try{
+    try {
         const datos = await inscripcionesRepository.obtenerDatosParaDiploma(idInscripcion);
 
-        if(!datos){
+        if (!datos) {
             return res.status(404).json({ success: false, message: 'Inscripción no encontrada' });
         }
 
@@ -106,7 +129,7 @@ const descargarDiploma = async (req, res) => {
                 <p class="texto-medio">Se extiende el presente certificado a:</p>
                 <div class="nombre-alumno">{{nombres}} {{apellido}}</div>
                 <p class="texto-medio">DNI: <strong>{{documento}}</strong>, por haber completado y aprobado el curso de:</p>
-                <div class="curso-titulo">"{{curso_nombre}}"</div>
+                <div class="curso-titulo">"${datos.nombre}"</div>
                 <p class="texto-medio">Con una carga horaria de {{cantidad_horas}} horas cátedra.</p>
                 
                 <div class="footer-diploma">
@@ -121,8 +144,7 @@ const descargarDiploma = async (req, res) => {
         const template = handlebars.compile(plantillaHtml);
         const htmlFinal = template(datos);
 
-        // 4. Corregido el nombre de "puppeteer"
-        const browser  = await puppeteer.launch({headless: "new"});
+        const browser = await puppeteer.launch({ headless: "new" });
         const page = await browser.newPage();
 
         await page.setContent(htmlFinal, { waitUntil: 'networkidle0' });
@@ -139,9 +161,10 @@ const descargarDiploma = async (req, res) => {
         res.setHeader("Content-Disposition", `attachment; filename=Diploma_Inscripcion_${idInscripcion}.pdf`);
         return res.send(Buffer.from(pdfBuffer));
         
-    } catch(error){
+    } catch (error) {
         console.error('Error al generar el diploma:', error);
         res.status(500).json({ success: false, message: 'Error al generar el diploma' });
     }
 }
-export  { listar, crear, eliminar, descargarDiploma };
+
+export { listar, crear, eliminar, descargarDiploma };

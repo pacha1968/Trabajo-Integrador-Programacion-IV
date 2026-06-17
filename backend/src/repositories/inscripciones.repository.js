@@ -38,7 +38,7 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         JOIN cursos c ON i.id_curso = c.id_curso
         JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
         JOIN inscripciones_estados ie ON i.id_inscripcion_estado = ie.id_inscripcion_estado
-        WHERE 1=1
+        WHERE c.id_curso_estado != 4 AND e.activo = 1
     `;
 
     let countQuery = `
@@ -46,7 +46,7 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         FROM inscripciones i
         JOIN cursos c ON i.id_curso = c.id_curso
         JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
-        WHERE 1=1
+        WHERE c.id_curso_estado != 4 AND e.activo = 1
     `;
 
     const queryParams = [];
@@ -81,14 +81,15 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         total: parseInt(countResult.rows[0].count)
     };
 }
-const crearInscripcion = async (id_curso, id_estudiante, id_isuario_modificacion) =>  {
+
+const crearInscripcion = async (id_curso, id_estudiante, id_usuario_modificacion) =>  {
     const query = `
         INSERT INTO inscripciones 
         (id_curso, id_estudiante, fecha_hora_inscripcion, id_inscripcion_estado, id_usuario_modificacion, fecha_hora_modificacion) 
         VALUES ($1, $2, NOW(), 1, $3, NOW()) 
         RETURNING *
     `;
-    const result = await pool.query(query, [id_curso, id_estudiante, id_isuario_modificacion]);
+    const result = await pool.query(query, [id_curso, id_estudiante, id_usuario_modificacion]);
     return result.rows[0];
 };
 
@@ -116,12 +117,8 @@ const obtenerDatosParaDiploma = async (idInscripcion) => {
     `;
     
     const result = await pool.query(query, [idInscripcion]);
-
     return result.rows[0] || null;
 };
-
-
-
 
 export default {
     verificarDisponibilidadCurso,

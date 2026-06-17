@@ -11,8 +11,8 @@ const obtenerEstudiantes = async (limit, offset, search) => {
     if (search) {
         const filtroFuzzy = `
             (documento ILIKE $1 OR 
-             translate(apellido, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($1, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') OR 
-             translate(nombres, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($1, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU'))
+             translate(nombres || ' ' || apellido, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($1, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') OR 
+             translate(apellido || ' ' || nombres, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($1, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU'))
         `;
         
         query += ` AND ${filtroFuzzy}`;

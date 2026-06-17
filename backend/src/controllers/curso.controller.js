@@ -67,13 +67,23 @@ const crearCurso = async (req, res) => {
 }
 
 const eliminarCurso = async (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
 
     try {
+        const inscriptosActivos = await cursoRepository.contarInscriptosActivos(id);
+        
+        if (inscriptosActivos > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `No se puede dar de baja. El curso tiene ${inscriptosActivos} estudiante(s) inscripto(s) actualmente.` 
+            });
+        }
         const result = await cursoRepository.eliminarCurso(id);
+        
         if (result.rowCount === 0) {
             return res.status(404).json({ success: false, message: 'Curso no encontrado' });
         }
+        
         res.json({ success: true, message: 'Curso eliminado correctamente', curso: result.rows[0] });
     } catch (error) {
         console.error('Error al eliminar curso:', error);
