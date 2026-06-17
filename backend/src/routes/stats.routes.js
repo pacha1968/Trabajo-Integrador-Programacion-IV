@@ -1,6 +1,6 @@
 import express from 'express';
 import statsController from '../controllers/stats.controller.js'; 
-import { verificarToken } from '../middlewares/verificarToken.js'; // <-- Importamos al vigilante
+import { verificarToken } from '../middlewares/verificarToken.js'; 
 
 const router = express.Router();
 

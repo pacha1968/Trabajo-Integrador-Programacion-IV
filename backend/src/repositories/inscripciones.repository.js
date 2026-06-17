@@ -1,6 +1,5 @@
 import pool from '../config/db.js';
 
-// 1. Verifica si el curso está abierto y si tiene cupo disponible
 const verificarDisponibilidadCurso = async (id_curso) => {
     const query = `
         SELECT 
@@ -21,19 +20,11 @@ const verificarInscripcionDuplicada = async (id_curso, id_estudiante) => {
         WHERE id_curso = $1 AND id_estudiante = $2 AND id_inscripcion_estado = 1
     `;
     const result = await pool.query(query, [id_curso, id_estudiante]);
-    return result.rows.length > 0; // Retorna true si ya existe una inscripción activa
+    return result.rows.length > 0;
 }
 
-// ==========================================
-// FUNCIONES BREAD
-// ==========================================
-
-// B - Browse / Read: Obtener lista paginada con JOINs para traer nombres legibles
-
-// B - Browse / Read: Obtener lista paginada con JOINs y Filtros
 const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') => {
     
-    // Consulta principal para traer los datos
     let baseQuery = `
         SELECT 
             i.id_inscripcion, 
@@ -50,7 +41,6 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         WHERE 1=1
     `;
 
-    // Consulta paralela para contar el total (necesario para la paginación)
     let countQuery = `
         SELECT COUNT(*)
         FROM inscripciones i
@@ -62,10 +52,8 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
     const queryParams = [];
     let paramIndex = 1;
 
-    // Filtro 1: Búsqueda de Estudiante (por nombre, apellido o DNI)
     if (estudiante) {
         const busqueda = `%${estudiante}%`;
-        // Usamos CAST por si el documento es integer en tu BD y le aplicamos ILIKE
         const filtroSql = ` AND (e.nombres ILIKE $${paramIndex} OR e.apellido ILIKE $${paramIndex} OR CAST(e.documento AS TEXT) ILIKE $${paramIndex})`;
         baseQuery += filtroSql;
         countQuery += filtroSql;
@@ -73,7 +61,6 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         paramIndex++;
     }
 
-    // Filtro 2: Búsqueda por ID de Curso
     if (curso) {
         const filtroSql = ` AND i.id_curso = $${paramIndex}`;
         baseQuery += filtroSql;
@@ -82,14 +69,11 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         paramIndex++;
     }
 
-    // 1ro: Ejecutamos el COUNT con los filtros aplicados
     const countResult = await pool.query(countQuery, queryParams);
 
-    // 2do: Le agregamos el ordenamiento, LIMIT y OFFSET a la consulta principal
     baseQuery += ` ORDER BY i.id_inscripcion_estado ASC, i.id_inscripcion DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     const finalParams = [...queryParams, limit, offset];
     
-    // Ejecutamos la consulta principal
     const result = await pool.query(baseQuery, finalParams);
 
     return {
@@ -97,7 +81,6 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
         total: parseInt(countResult.rows[0].count)
     };
 }
-// A - Add: Crear una nueva inscripción
 const crearInscripcion = async (id_curso, id_estudiante, id_isuario_modificacion) =>  {
     const query = `
         INSERT INTO inscripciones 
@@ -109,9 +92,7 @@ const crearInscripcion = async (id_curso, id_estudiante, id_isuario_modificacion
     return result.rows[0];
 };
 
-// D - Delete: Borrado Lógico (Soft Delete)
 const cancelarInscripcion = async (id_inscripcion, id_usuario_modificacion) => {
-    // Estado 2 = Cancelada
     const query = `
         UPDATE inscripciones 
         SET id_inscripcion_estado = 2, 
@@ -126,7 +107,6 @@ const cancelarInscripcion = async (id_inscripcion, id_usuario_modificacion) => {
 }
 
 const obtenerDatosParaDiploma = async (idInscripcion) => {
-    // CORRECCIÓN: Usar pool.query y $1 en lugar de db.query y ?
     const query = `
         SELECT i.id_inscripcion, e.nombres, e.apellido, e.documento, c.nombre AS curso_nombre, c.cantidad_horas
         FROM inscripciones i
@@ -137,7 +117,6 @@ const obtenerDatosParaDiploma = async (idInscripcion) => {
     
     const result = await pool.query(query, [idInscripcion]);
 
-    // CORRECCIÓN: PostgreSQL devuelve los datos dentro del array result.rows
     return result.rows[0] || null;
 };
 

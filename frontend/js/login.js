@@ -1,12 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
     const formLogin = document.getElementById('formLogin');
+    
+    const btnTogglePassword = document.getElementById('btnTogglePassword');
+    const inputPassword = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    if (btnTogglePassword) {
+        btnTogglePassword.addEventListener('click', () => {
+            const tipoActual = inputPassword.getAttribute('type');
+            const nuevoTipo = tipoActual === 'password' ? 'text' : 'password';
+            inputPassword.setAttribute('type', nuevoTipo);
+            
+            toggleIcon.classList.toggle('bi-eye');
+            toggleIcon.classList.toggle('bi-eye-slash');
+        });
+    }
             
     formLogin.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Obtenemos los valores de los IDs de tu HTML
         const username = document.getElementById('usuario').value;
-        const password = document.getElementById('password').value;
+        const password = inputPassword.value; 
 
         try {
             const response = await fetch('http://localhost:3000/login', {
@@ -18,11 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
-                // Guardamos el token y el nombre para usarlos en todo el sitio
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userName', `${data.user.nombre} ${data.user.apellido}`);
                 
-                // Alerta estética de éxito con temporizador de redirección
                 Swal.fire({
                     icon: 'success',
                     title: `¡Bienvenido, ${data.user.nombre}!`,
@@ -35,17 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
             } else {
-                // Si el backend rechaza las credenciales, mostramos alerta de advertencia
                 Swal.fire({
                     icon: 'warning',
                     title: 'Acceso Denegado',
                     text: data.message || data.error || 'Credenciales incorrectas.',
-                    confirmButtonColor: '#002147' // Color azul oscuro a tono con el diseño
+                    confirmButtonColor: '#002147' 
                 });
             }   
         } catch (error) {
             console.error(error);
-            // Alerta roja de error crítico de conexión con el servidor
             Swal.fire({
                 icon: 'error',
                 title: 'Error de Conexión',

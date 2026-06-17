@@ -9,14 +9,12 @@ const obtenerCursos = async (req, res) => {
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
 
-        // Limpiamos los filtros: Solo los pasamos si REALMENTE tienen algo válido
         const filters = {};
         
         if (req.query.nombre && req.query.nombre !== 'undefined' && req.query.nombre.trim() !== '') {
             filters.nombre = req.query.nombre;
         }
         
-        // Evitamos que pasen valores vacíos, "0", o textos como "Todos"
         if (req.query.estado && req.query.estado !== '0' && req.query.estado !== 'Todos' && req.query.estado !== 'undefined' && req.query.estado !== '') {
             filters.estado = req.query.estado;
         }
@@ -108,7 +106,6 @@ const descargarReporte = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Curso no encontrado' });
         }
 
-        // Diseño del reporte con una tabla dinámica para los alumnos
         const plantillaHtml = `
         <!DOCTYPE html>
         <html>
@@ -185,7 +182,7 @@ const descargarReporte = async (req, res) => {
 
         const pdfBuffer = await page.pdf({
             format: 'A4',
-            landscape: false, // Reporte formal en formato vertical
+            landscape: false, 
             printBackground: true,
             margin: { top: '20px', bottom: '40px', left: '20px', right: '20px' }
         });
@@ -195,7 +192,6 @@ const descargarReporte = async (req, res) => {
         res.contentType("application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename=Reporte_Curso_${id}.pdf`);
         
-        // CORRECCIÓN CLAVE: Enviamos como Buffer binario directo
         return res.send(Buffer.from(pdfBuffer));
 
     } catch (error) {

@@ -8,11 +8,9 @@ const listar = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        // Capturamos los filtros que vienen de la URL
         const estudiante = req.query.estudiante || '';
         const curso = req.query.curso || '';
 
-        // Pasamos todo al repositorio
         const resultado = await inscripcionesRepository.obtenerInscripciones(limit, offset, estudiante, curso);
         
         res.json({
@@ -33,7 +31,7 @@ const crear = async (req, res) => {
     try {
         const { id_curso, id_estudiante } = req.body;
         
-        // Sacamos el ID del usuario directamente del Token JWT (para la auditoría)
+        // Sacamos el ID del usuario directamente del Token JWT 
         const id_usuario_modificacion = req.usuario.id;
 
         const nuevaInscripcion = await inscripcionesRepository.crearInscripcion(id_curso, id_estudiante, id_usuario_modificacion);
@@ -74,18 +72,15 @@ const eliminar = async (req, res) => {
 
 
 const descargarDiploma = async (req, res) => {
-    // 1. Corregido el .is por .id
     const idInscripcion = req.params.id;
 
     try{
-        // 2. Corregido el nombre de la función que viene del repository
         const datos = await inscripcionesRepository.obtenerDatosParaDiploma(idInscripcion);
 
         if(!datos){
             return res.status(404).json({ success: false, message: 'Inscripción no encontrada' });
         }
 
-        // 3. ¡Aquí está la variable que faltaba!
         const plantillaHtml = `
         <!DOCTYPE html>
         <html>
@@ -149,5 +144,4 @@ const descargarDiploma = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error al generar el diploma' });
     }
 }
-// Acá está la línea que tiraba el error. Ahora sí tiene las 3 funciones definidas arriba.
 export  { listar, crear, eliminar, descargarDiploma };

@@ -1,27 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Función auxiliar para capitalizar la primera letra de cada palabra
     const formatoTitulo = (texto) => {
         if (!texto) return '';
         return texto.toLowerCase().split(' ').map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1)).join(' ');
     };
 
-    // ==========================================
-    // CONTROL DE ACCESO, NAVBAR INTERACTIVO Y LOGOUT
-    // ==========================================
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = 'login.html'; 
         return;
     }
 
-    // Inyecta el nombre del usuario logueado en el nuevo Dropdown
     const nombreAdmin = localStorage.getItem('userName');
     const displayAdmin = document.getElementById('nombreUsuarioNavbar');
     if (nombreAdmin && displayAdmin) {
         displayAdmin.textContent = nombreAdmin;
     }
 
-    // Escucha el clic en el botón de Cerrar Sesión del nuevo menú
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener('click', (e) => {
@@ -31,23 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'login.html';
         });
     }
-    // ==========================================
 
     const tablaEstudiantes = document.getElementById('tabla-estudiantes');
     const formNuevoEstudiante = document.getElementById('formNuevoEstudiante');
     const inputBusqueda = document.getElementById('inputBusqueda');
     const contenedorPaginacion = document.getElementById('paginacion-container');
     
-    // Variables globales para la paginación, filtrado y edición
     let paginaActual = 1;
     const limitePorPagina = 5;
     let busquedaActual = '';
-    let estudianteEditandoId = null; // null = Modo Crear | ID = Modo Editar
-    let estudiantesActuales = []; // Guardamos los datos en memoria para leerlos rápido al editar
+    let estudianteEditandoId = null; 
+    let estudiantesActuales = []; 
 
-    // ==========================================
-    // ALERTAS UNIFICADAS CON SWEETALERT2
-    // ==========================================
     const manejarAlerta = (esExitoso, titulo, mensaje) => {
         if (esExitoso) {
             Swal.fire({
@@ -68,14 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // Escuchamos el buscador (LIVE SEARCH)
     inputBusqueda.addEventListener('keyup', (e) => {
         busquedaActual = e.target.value;
         paginaActual = 1; 
         cargarEstudiantes();
     });
 
-    // 2. LEER ESTUDIANTES (GET)
     const cargarEstudiantes = async () => {
         try {
             const url = `http://localhost:3000/api/estudiantes?page=${paginaActual}&limit=${limitePorPagina}&search=${encodeURIComponent(busquedaActual)}`;
@@ -87,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 tablaEstudiantes.innerHTML = ''; 
-                estudiantesActuales = data.data; // Guardamos la lista en memoria
+                estudiantesActuales = data.data;
                 
                 if (data.data.length === 0) {
                     tablaEstudiantes.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron estudiantes</td></tr>`;
@@ -118,11 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Función unificada para dibujar la paginación
     const renderizarPaginacion = (pagination) => {
         contenedorPaginacion.innerHTML = ''; 
 
-        // Adaptación clave: leemos 'page' en lugar de 'currentPage' según tu API de estudiantes
         const paginaActualBackend = pagination.page;
         const totalPaginasBackend = pagination.totalPages;
 
@@ -163,16 +148,75 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedorPaginacion.appendChild(nav);
     };
 
-    // 3. CREAR O ACTUALIZAR ESTUDIANTE (POST / PUT)
     formNuevoEstudiante.addEventListener('submit', async (e) => {
         e.preventDefault(); 
         
+        const inputs = formNuevoEstudiante.querySelectorAll('.form-control');
+        inputs.forEach(input => input.classList.remove('is-invalid'));
+
+        let esValido = true;
+
+        const inputDocumento = document.getElementById('documento');
+        const inputNombres = document.getElementById('nombres');
+        const inputApellido = document.getElementById('apellido');
+        const inputEmail = document.getElementById('email');
+        const inputFechaNac = document.getElementById('fecha_nacimiento');
+
+        const valDocumento = inputDocumento.value.trim();
+        const valNombres = inputNombres.value.trim();
+        const valApellido = inputApellido.value.trim();
+        const valEmail = inputEmail.value.trim();
+        const valFechaNac = inputFechaNac.value;
+
+        const regexDNI = /^\d{7,8}$/;
+        if (!regexDNI.test(valDocumento)) {
+            inputDocumento.classList.add('is-invalid');
+            esValido = false;
+        }
+
+        const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        if (!valNombres || !regexLetras.test(valNombres)) {
+            inputNombres.classList.add('is-invalid');
+            esValido = false;
+        }
+        if (!valApellido || !regexLetras.test(valApellido)) {
+            inputApellido.classList.add('is-invalid');
+            esValido = false;
+        }
+
+        if (!valEmail || !valEmail.includes('@')) {
+            inputEmail.classList.add('is-invalid');
+            esValido = false;
+        }
+
+        if (!valFechaNac) {
+            inputFechaNac.classList.add('is-invalid');
+            esValido = false;
+        } else {
+            const fechaNacimiento = new Date(valFechaNac);
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            const diferenciaMeses = hoy.getMonth() - fechaNacimiento.getMonth();
+            
+            if (diferenciaMeses < 0 || (diferenciaMeses === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+                edad--;
+            }
+
+            if (edad < 17 || edad > 70) {
+                inputFechaNac.classList.add('is-invalid');
+                document.getElementById('errorFechaNac').textContent = `La edad calculada es ${edad} años. Debe estar entre 17 y 70.`;
+                esValido = false;
+            }
+        }
+
+        if (!esValido) return;
+
         const datosFormulario = {
-            documento: document.getElementById('documento').value,
-            nombres: document.getElementById('nombres').value,
-            apellido: document.getElementById('apellido').value,
-            email: document.getElementById('email').value,
-            fecha_nacimiento: document.getElementById('fecha_nacimiento').value 
+            documento: valDocumento,
+            nombres: valNombres,
+            apellido: valApellido,
+            email: valEmail,
+            fecha_nacimiento: valFechaNac 
         };
 
         const metodo = estudianteEditandoId ? 'PUT' : 'POST';
@@ -180,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `http://localhost:3000/api/estudiantes/${estudianteEditandoId}` 
             : 'http://localhost:3000/api/estudiantes';
 
-        try { 
+        try {
             const response = await fetch(urlEndpoint, {
                 method: metodo,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -190,12 +234,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
-                bootstrap.Modal.getInstance(document.getElementById('modalNuevoEstudiante')).hide();
-                cargarEstudiantes();
-                
-                // Usamos la función estandarizada
+                formNuevoEstudiante.reset();
+                const modalEl = document.getElementById('modalNuevoEstudiante');
+                const modalInst = bootstrap.Modal.getInstance(modalEl);
+                if (modalInst) modalInst.hide();
+
                 const mensajeExito = estudianteEditandoId ? 'El estudiante fue actualizado correctamente.' : 'El estudiante fue registrado correctamente.';
                 manejarAlerta(true, '¡Excelente!', mensajeExito);
+                cargarEstudiantes();
             } else {
                 if (data.errors) {
                     const mensajes = data.errors.map(err => err.msg).join('\n');
@@ -205,15 +251,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (error) {
-            console.error(error);
+            console.error('Error en la petición:', error);
             manejarAlerta(false, 'Error crítico', 'No se pudo contactar al servidor.');
         }
     });
 
-    // 4. ESCUCHAR CLICS EN LA TABLA (ELIMINAR Y EDITAR)
+    
     tablaEstudiantes.addEventListener('click', async (e) => {
         
-        // --- LÓGICA DE ELIMINAR ---
         const btnBorrar = e.target.closest('.btn-borrar');
         if (btnBorrar) {
             const idEstudiante = btnBorrar.getAttribute('data-id');
@@ -242,7 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // --- LÓGICA DE EDITAR ---
         const btnEditar = e.target.closest('.btn-editar');
         if (btnEditar) {
             const idEstudiante = parseInt(btnEditar.getAttribute('data-id'));
@@ -275,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 5. LIMPIEZA AUTOMÁTICA DEL MODAL
     document.getElementById('modalNuevoEstudiante').addEventListener('hidden.bs.modal', () => {
         formNuevoEstudiante.reset();
         estudianteEditandoId = null; 
@@ -287,6 +330,5 @@ document.addEventListener('DOMContentLoaded', () => {
         inputDocumento.classList.remove('bg-light', 'text-muted');
     });
 
-    // Arrancamos
     cargarEstudiantes();
 });

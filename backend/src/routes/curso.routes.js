@@ -7,11 +7,6 @@ const router = express.Router();
 
 router.get('/', cursosController.obtenerCursos);
 
-// ==========================================
-// RUTAS PROTEGIDAS (Requieren inicio de sesión)
-// ==========================================
-
-// CORRECCIÓN: Se agregó la 's' a cursosController en estas 3 rutas
 router.post('/', verificarToken, validarCrearCurso, cursosController.crearCurso);
 router.put('/:id', verificarToken, validarCrearCurso, cursosController.actualizarCurso);
 router.delete('/:id', verificarToken, cursosController.eliminarCurso); 

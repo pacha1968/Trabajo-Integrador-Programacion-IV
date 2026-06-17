@@ -1,19 +1,16 @@
 import estudianteRepository from '../repositories/estudiante.repository.js';
+import db from '../config/db.js'; 
 
 const obtenerEstudiantes = async (req, res) => {
     try {
-        // Capturamos los parámetros de la URL (si no vienen, usamos valores por defecto)
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 5; // Mostramos 5 alumnos por página
+        const limit = parseInt(req.query.limit) || 5; 
         const search = req.query.search || '';
         
-        // Calculamos cuántos registros hay que saltear
-        // Ej: Página 1 = offset 0. Página 2 = offset 5.
         const offset = (page - 1) * limit;
 
         const { estudiantes, total } = await estudianteRepository.obtenerEstudiantes(limit, offset, search);
         
-        // Calculamos el total de páginas
         const totalPages = Math.ceil(total / limit);
 
         res.status(200).json({ 
@@ -37,6 +34,18 @@ const crearEstudiante = async (req, res) => {
     const id_usuario_modificacion = req.usuario?.id || req.usuario?.id_usuario || 1;
 
     try {
+        // --- 1. VALIDACIÓN DE DNI ÚNICO ---
+        const dniExistente = await db.query('SELECT id_estudiante FROM estudiantes WHERE documento = $1', [documento]);
+        if (dniExistente.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'El DNI ingresado ya está registrado en el sistema.' });
+        }
+
+        // --- 2. VALIDACIÓN DE EMAIL ÚNICO ---
+        const emailExistente = await db.query('SELECT id_estudiante FROM estudiantes WHERE email = $1', [email]);
+        if (emailExistente.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'El correo electrónico ya pertenece a otro estudiante.' });
+        }
+
         const nuevoEstudiante = await estudianteRepository.crearEstudiante({ documento, nombres, apellido, email, fecha_nacimiento, id_usuario_modificacion });
         res.status(201).json({ success: true, estudiante: nuevoEstudiante });
     } catch (error) {
@@ -69,6 +78,16 @@ const actualizarEstudiante = async (req, res) => {
     const id_usuario_modificacion = req.usuario?.id || req.usuario?.id_usuario || 1;
 
     try {
+        const dniExistente = await db.query('SELECT id_estudiante FROM estudiantes WHERE documento = $1 AND id_estudiante != $2', [documento, id]);
+        if (dniExistente.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'El DNI ingresado ya está registrado en otro estudiante.' });
+        }
+
+        const emailExistente = await db.query('SELECT id_estudiante FROM estudiantes WHERE email = $1 AND id_estudiante != $2', [email, id]);
+        if (emailExistente.rows.length > 0) {
+            return res.status(400).json({ success: false, message: 'El correo electrónico ya pertenece a otro estudiante.' });
+        }
+
         const estudianteActualizado = await estudianteRepository.actualizarEstudiante(
             id, 
             { documento, nombres, apellido, email, fecha_nacimiento }, 
@@ -86,8 +105,6 @@ const actualizarEstudiante = async (req, res) => {
     }
 };
 
-
-// Exportar:
 export default {
     obtenerEstudiantes,
     crearEstudiante,

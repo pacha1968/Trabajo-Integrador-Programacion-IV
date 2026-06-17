@@ -134,3 +134,65 @@ La topología del backend se compone de:
 * 🧠 **Controllers:** Manejan las validaciones y las respuestas al cliente.
 * 💾 **Repositories:** Contienen de forma exclusiva las consultas SQL a PostgreSQL.
 * ⚙️ **Config:** Administra la conexión a la base de datos y credenciales de forma segura.
+
+
+
+
+
+# Sistema de Gestión Académica (SGA) - UNER 🎓
+
+Proyecto desarrollado como Trabajo Final Integrador para la cátedra de **Programación IV (2026)** de la Licenciatura en Sistemas en la **Facultad de Ciencias de la Administración - UNER**.
+
+Este sistema es una aplicación web responsiva diseñada para gestionar estudiantes, cursos e inscripciones mediante una arquitectura RESTful, aplicando estrictos estándares de seguridad y experiencia de usuario.
+
+## 🚀 Tecnologías y Arquitectura
+
+El proyecto está dividido en dos capas claramente separadas (Frontend y Backend) para asegurar la escalabilidad:
+
+### **Frontend**
+* **HTML5 & CSS3:** Semántica y estilos personalizados (`styless.css`).
+* **JavaScript (Vanilla):** Lógica asíncrona (`fetch` API), delegación de eventos y *Live Search* (Debounce).
+* **Bootstrap 5 & Bootstrap Icons:** Framework CSS para diseño responsivo y maquetación (Flexbox/Grid).
+* **SweetAlert2:** Para la estandarización de modales y alertas del sistema.
+
+### **Backend**
+* **Node.js & Express.js:** Servidor y enrutamiento de la API REST.
+* **PostgreSQL (pg):** Motor de base de datos relacional.
+* **Bcrypt / JSON Web Tokens (JWT):** Para encriptación de contraseñas y autenticación por sesión segura (Vigilante de rutas).
+* **Puppeteer:** Utilizado para la generación dinámica de Diplomas/Certificados en formato PDF.
+* **Dotenv:** Para la gestión segura de información sensible mediante variables de entorno.
+
+---
+
+## ✨ Características Principales
+
+Cumpliendo con los requerimientos funcionales de la cátedra, el sistema incluye:
+
+1. **Autenticación Segura:** Login protegido. El token JWT se almacena y se envía en los *headers* (`Authorization: Bearer <token>`) en cada petición HTTP al backend.
+2. **Soft Deletes (Borrados Lógicos):** No se realizan `DELETE` físicos en la base de datos. Se actualizan los campos de estado (`id_curso_estado`, `activo`) para mantener la integridad referencial.
+3. **BREAD Completo:** Operaciones de *Browse, Read, Edit, Add, Delete* en los módulos principales.
+4. **Buscador en Tiempo Real (Live Search):** Implementación de funciones *Debounce* en el frontend para filtrar registros de la base de datos de manera instantánea y eficiente sin recargar la página.
+5. **Paginación Dinámica:** Tanto en backend (mediante `LIMIT` y `OFFSET`) como en frontend para optimizar la carga de datos.
+6. **Generación de Diplomas:** Exportación nativa a PDF de los certificados de los alumnos.
+
+---
+
+## ⚙️ Instalación y Configuración
+
+Siga estos pasos para desplegar el proyecto en un entorno local:
+
+### 1. Base de Datos
+1. Crear una base de datos en PostgreSQL.
+2. Ejecutar el script SQL incluido en la carpeta `database` (o en la raíz) para generar las tablas (`usuarios`, `estudiantes`, `cursos`, `inscripciones`, etc.) y sus relaciones.
+   * *Nota Técnica:* Si se insertan registros de prueba manualmente vía SQL, se recomienda sincronizar las secuencias de las llaves primarias usando: `SELECT setval(pg_get_serial_sequence('nombre_tabla', 'id_columna'), (SELECT MAX(id_columna) FROM nombre_tabla));`
+
+### 2. Variables de Entorno (Backend)
+En la carpeta `/backend`, crear un archivo llamado `.env` basándose en el `.env.example` (si existe), o configurar las siguientes variables:
+```env
+PORT=3000
+DB_USER=tu_usuario_postgres
+DB_PASSWORD=tu_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=nombre_de_tu_bd
+JWT_SECRET=tu_clave_secreta_super_segura

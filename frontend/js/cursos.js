@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ==========================================
-    // CONTROL DE ACCESO, NAVBAR INTERACTIVO Y LOGOUT
-    // ==========================================
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = 'login.html';
@@ -24,10 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'login.html'; 
         });
     }
-
-    // ==========================================
-    // VARIABLES GLOBALES
-    // ==========================================
     const tablaCursos = document.getElementById('tabla-cursos');
     const formNuevoCurso = document.getElementById('formNuevoCurso');
     const formEditarCurso = document.getElementById('formEditarCurso');
@@ -44,9 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${dia}/${mes}/${anio}`;
     };
 
-    // ==========================================
-    // ALERTAS UNIFICADAS CON SWEETALERT2
-    // ==========================================
     const manejarAlerta = (esExitoso, titulo, mensaje) => {
         if (esExitoso) {
             Swal.fire({
@@ -67,9 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ==========================================
-    // 2. LEER CURSOS (READ)
-    // ==========================================
     const cargarCursos = async () => {
         try {
             const inputNombre = document.getElementById('filtroNombre')?.value.trim() || '';
@@ -172,9 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ==========================================
-    // 3. CREAR CURSO (POST)
-    // ==========================================
     if (formNuevoCurso) {
         formNuevoCurso.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -248,10 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // ==========================================
-    // 4. ACTUALIZAR CURSO (PUT)
-    // ==========================================
+ 
     const abrirModalEditar = (id) => {
         const curso = cursosCache.find(c => c.id_curso === id);
         if (!curso) return;
@@ -332,9 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================
-    // 5. ELIMINAR CURSO (DELETE CON SWEETALERT)
-    // ==========================================
     const eliminarCurso = async (id) => {
         const confirmacion = await Swal.fire({
             title: '¿Estás seguro?',
@@ -370,9 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ==========================================
-    // 6. FILTROS Y PAGINACIÓN (LIVE SEARCH)
-    // ==========================================
     const debounce = (func, delay) => {
         let temporizador;
         return (...args) => {
@@ -449,10 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
         contenedor.appendChild(nav);
     };
 
-
-    // ==========================================
-    // 7. GENERACIÓN DE REPORTE PDF
-    // ==========================================
     window.generarReporteCurso = async function(id) {
         try {
             Swal.fire({

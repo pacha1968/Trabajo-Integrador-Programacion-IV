@@ -5,7 +5,7 @@ const buscarUsuarioParaLogin = async (username, passwordHash) => {
         'SELECT id_usuario, nombre_usuario, nombre, apellido FROM usuarios WHERE nombre_usuario = $1 AND contrasenia = $2 AND activo = 1',
         [username, passwordHash]
     );
-    return result.rows[0]; // Devuelve el usuario encontrado o undefined si no existe
+    return result.rows[0]; 
 };
 
 export default {

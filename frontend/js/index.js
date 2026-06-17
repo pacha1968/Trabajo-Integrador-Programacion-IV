@@ -1,35 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ==========================================
-    // 1. SEGURIDAD, USUARIO Y CIERRE DE SESIÓN
-    // ==========================================
     const token = localStorage.getItem('token');
     if (!token) {
-        window.location.href = 'login.html'; // O tu vista de login
+        window.location.href = 'login.html'; 
         return;
     }
 
-    // Mostrar el nombre del usuario logueado en el nuevo header interactivo
     const nombreAdmin = localStorage.getItem('userName');
     const displayAdmin = document.getElementById('nombreUsuarioNavbar');
     if (nombreAdmin && displayAdmin) {
         displayAdmin.textContent = nombreAdmin;
     }
 
-    // Funcionalidad del botón Cerrar Sesión (Igual que en los otros módulos)
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('token');
             localStorage.removeItem('userName');
-            window.location.href = 'login.html'; // O tu vista de login
+            window.location.href = 'login.html'; 
         });
     }
 
-    // ==========================================
-    // 2. CONFIGURAR LA FECHA ACTUAL
-    // ==========================================
     const mostrarFecha = () => {
         const opciones = { day: 'numeric', month: 'long', year: 'numeric' };
         const fecha = new Date().toLocaleDateString('es-ES', opciones);
@@ -38,9 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     mostrarFecha();
 
-    // ==========================================
-    // 3. OBTENER LAS ESTADÍSTICAS DEL BACKEND
-    // ==========================================
     const cargarDashboard = async () => {
         try {
             const response = await fetch('http://localhost:3000/api/stats', {
@@ -54,16 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.success) {
-                // Rellenamos las tarjetas usando los IDs seguros
                 document.getElementById('totalEstudiantes').textContent = data.data.totalEstudiantes;
                 document.getElementById('totalCursos').textContent = data.data.totalCursos;
                 document.getElementById('totalInscripciones').textContent = data.data.totalInscripciones;
 
-                // Rellenamos la tabla de cursos rápidos
                 const tablaCursos = document.getElementById('tablaCursosRapidos');
                 if (tablaCursos) {
-                    tablaCursos.innerHTML = ''; // Limpiamos los datos de prueba
-
+                    tablaCursos.innerHTML = ''; 
                     if (data.data.cursosRapidos && data.data.cursosRapidos.length > 0) {
                         data.data.cursosRapidos.forEach(curso => {
                             const tr = document.createElement('tr');

@@ -1,20 +1,15 @@
-// ==========================================
-// 1. CONTROL DE ACCESO, NAVBAR INTERACTIVO Y LOGOUT
-// ==========================================
 const token = localStorage.getItem('token');
 if (!token) {
     window.location.href = 'login.html'; 
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Inyecta el nombre del usuario logueado en el nuevo Dropdown
     const nombreAdmin = localStorage.getItem('userName');
     const displayAdmin = document.getElementById('nombreUsuarioNavbar');
     if (nombreAdmin && displayAdmin) {
         displayAdmin.textContent = nombreAdmin;
     }
 
-    // Escucha el clic en el botón de Cerrar Sesión del nuevo menú
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener('click', (e) => {
@@ -25,15 +20,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Carga inicial de datos
     await cargarInscripciones();
     await cargarEstudiantesParaSelect();
     await cargarCursosParaSelect();
 });
 
-// ==========================================
-// VARIABLES GLOBALES
-// ==========================================
+// Variables globales y referencias a elementos del DOM
 const tbodyInscripciones = document.getElementById('tbody-inscripciones');
 const paginacionContainer = document.getElementById('paginacion-container');
 const formNuevaInscripcion = document.getElementById('formNuevaInscripcion');
@@ -43,16 +35,10 @@ const selectCurso = document.getElementById('selectCurso');
 let paginaActual = 1;
 let idInscripcionSeleccionada = null; 
 
-// ==========================================
-// FUNCIONES DE CARGA Y RENDERIZADO TABLA
-// ==========================================
 async function cargarInscripciones() {
     try {
-        // Capturamos los filtros directamente del HTML
         const inputEstudiante = document.getElementById('filtroEstudiante')?.value.trim() || '';
         const inputCurso = document.getElementById('filtroSelectCurso')?.value || '';
-
-        // Armamos la URL con los parámetros
         const url = `http://localhost:3000/api/inscripciones?page=${paginaActual}&limit=5&estudiante=${encodeURIComponent(inputEstudiante)}&curso=${encodeURIComponent(inputCurso)}`;
 
         const response = await fetch(url, {
@@ -82,7 +68,6 @@ function renderizarTabla(inscripciones) {
     inscripciones.forEach(insc => {
         const fecha = new Date(insc.fecha_hora_inscripcion).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
         
-        // Verificamos si está activa o cancelada según el texto que viene de la BD
         const esCancelada = insc.estado && insc.estado.toLowerCase().includes('cancelada'); 
 
         const estadoBadge = !esCancelada 
@@ -110,11 +95,6 @@ function renderizarTabla(inscripciones) {
     });
 }
 
-// ==========================================
-// FILTROS (LIVE SEARCH)
-// ==========================================
-
-// Función Debounce: Evita saturar al servidor con peticiones por cada letra
 const debounce = (func, delay) => {
     let temporizador;
     return (...args) => {
@@ -123,29 +103,22 @@ const debounce = (func, delay) => {
     };
 };
 
-// Función centralizada para reiniciar la página y buscar
 const aplicarFiltros = () => {
     paginaActual = 1; 
     cargarInscripciones(); 
 };
 
-// Capturamos los inputs
 const inputFiltroEstudiante = document.getElementById('filtroEstudiante');
 const selectFiltroCurso = document.getElementById('filtroSelectCurso');
 
-// Escuchador para el texto: se activa 300ms después de que el usuario deja de tipear
 if (inputFiltroEstudiante) {
     inputFiltroEstudiante.addEventListener('keyup', debounce(aplicarFiltros, 300));
 }
 
-// Escuchador para el selector: se activa inmediatamente al elegir otra opción
 if (selectFiltroCurso) {
     selectFiltroCurso.addEventListener('change', aplicarFiltros);
 }
 
-// ==========================================
-// LLENAR SELECTORES DINÁMICAMENTE
-// ==========================================
 async function cargarEstudiantesParaSelect() {
     try {
         const response = await fetch('http://localhost:3000/api/estudiantes?limit=100', {
@@ -179,7 +152,6 @@ async function cargarCursosParaSelect() {
 
         if (data.success) {
             data.data.forEach(curso => {
-                // 1. Para el MODAL: Solo mostramos cursos con estado "Inscripción Abierta" (id: 2)
                 if (curso.id_curso_estado === 2) {
                     const optionModal = document.createElement('option');
                     optionModal.value = curso.id_curso;
@@ -187,7 +159,6 @@ async function cargarCursosParaSelect() {
                     selectCurso.appendChild(optionModal);
                 }
                 
-                // 2. Para la BARRA DE FILTROS: Mostramos TODOS los cursos
                 if (filtroSelectCurso) {
                     const optionFiltro = document.createElement('option');
                     optionFiltro.value = curso.id_curso;
@@ -201,9 +172,6 @@ async function cargarCursosParaSelect() {
     }
 }
 
-// ==========================================
-// ALERTAS UNIFICADAS CON SWEETALERT2
-// ==========================================
 const manejarAlerta = (esExitoso, titulo, mensaje) => {
     if (esExitoso) {
         Swal.fire({
@@ -224,9 +192,6 @@ const manejarAlerta = (esExitoso, titulo, mensaje) => {
     }
 };
 
-// ==========================================
-// ALTA DE INSCRIPCIÓN Y BAJA
-// ==========================================
 if (formNuevaInscripcion) {
     formNuevaInscripcion.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -269,7 +234,6 @@ if (formNuevaInscripcion) {
     });
 }
 
-// NUEVA BAJA LÓGICA CON SWEETALERT
 window.abrirModalBaja = async function(id) {
     const confirmacion = await Swal.fire({
         title: '¿Anular inscripción?', 
@@ -280,7 +244,7 @@ window.abrirModalBaja = async function(id) {
         cancelButtonColor: '#6c757d', 
         confirmButtonText: 'Sí, anular', 
         cancelButtonText: 'Cancelar',
-        reverseButtons: true // Consistencia visual con el módulo de Cursos
+        reverseButtons: true 
     });
 
     if (confirmacion.isConfirmed) {
@@ -304,9 +268,6 @@ window.abrirModalBaja = async function(id) {
     }
 };
 
-// ==========================================
-// PAGINACIÓN Y PDF
-// ==========================================
 function renderizarPaginacion(pagination) {
     if (pagination.totalItems === 0) {
         paginacionContainer.innerHTML = '';
@@ -343,7 +304,6 @@ window.cambiarPagina = function(nuevaPagina) {
 
 window.generarPDF = async function(id) {
     try {
-        // 1. Mostramos una alerta de carga amigable
         Swal.fire({
             title: 'Generando diploma...',
             text: 'Preparando el certificado, por favor esperá.',
@@ -351,7 +311,6 @@ window.generarPDF = async function(id) {
             didOpen: () => { Swal.showLoading(); }
         });
 
-        // 2. Le pegamos al backend enviando el token de seguridad
         const response = await fetch(`http://localhost:3000/api/inscripciones/${id}/diploma`, {
             method: 'GET',
             headers: {
@@ -363,22 +322,18 @@ window.generarPDF = async function(id) {
             throw new Error('Error en el servidor al generar el PDF');
         }
 
-        // 3. Convertimos la respuesta binaria en un archivo temporal (Blob)
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         
-        // 4. Truco de JS: Creamos un link invisible, le hacemos clic y lo destruimos
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Diploma_Inscripcion_${id}.pdf`; // Nombre del archivo que se descarga
+        link.download = `Diploma_Inscripcion_${id}.pdf`; 
         document.body.appendChild(link);
         link.click();
         
-        // Limpiamos la basura
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
 
-        // Cerramos la alerta de carga
         Swal.close();
         manejarAlerta(true, '¡Éxito!', 'El diploma se descargó correctamente.');
 

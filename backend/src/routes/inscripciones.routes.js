@@ -5,7 +5,7 @@ import { verificarToken } from '../middlewares/verificarToken.js';
 
 const router = express.Router();
 
-router.use(verificarToken); // Aplica el middleware de verificación de token a todas las rutas
+router.use(verificarToken); 
 
 router.get('/', inscripcionesController.listar);
 router.post('/', validarInscripcion, inscripcionesController.crear);
