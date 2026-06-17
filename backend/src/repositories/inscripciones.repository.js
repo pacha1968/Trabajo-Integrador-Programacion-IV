@@ -54,7 +54,12 @@ const obtenerInscripciones = async (limit, offset, estudiante = '', curso = '') 
 
     if (estudiante) {
         const busqueda = `%${estudiante}%`;
-        const filtroSql = ` AND (e.nombres ILIKE $${paramIndex} OR e.apellido ILIKE $${paramIndex} OR CAST(e.documento AS TEXT) ILIKE $${paramIndex})`;
+        const filtroSql = ` AND (
+            CAST(e.documento AS TEXT) ILIKE $${paramIndex} OR 
+            translate(e.nombres || ' ' || e.apellido, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($${paramIndex}, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') OR 
+            translate(e.apellido || ' ' || e.nombres, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($${paramIndex}, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU')
+        )`;
+        
         baseQuery += filtroSql;
         countQuery += filtroSql;
         queryParams.push(busqueda);

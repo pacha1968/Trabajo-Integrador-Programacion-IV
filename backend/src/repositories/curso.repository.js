@@ -6,7 +6,7 @@ const obtenerCursos = async (limit, offset, filters = {}) => {
     let paramIndex = 1;
 
     if (filters.nombre) {
-        whereClauses.push(`nombre ILIKE $${paramIndex}`);
+        whereClauses.push(`translate(nombre, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU') ILIKE translate($${paramIndex}, 'áéíóúÁÉÍÓÚ', 'aeiouAEIOU')`);
         values.push(`%${filters.nombre}%`);
         paramIndex++;
     }
@@ -97,7 +97,6 @@ const obtenerDatosParaReporte = async (idCurso) => {
 };
 
 const contarInscriptosActivos = async (idCurso) => {
-    // Asumimos que id_inscripcion_estado = 1 significa "Activo" según la lógica que armó tu compañero
     const query = 'SELECT COUNT(*) FROM inscripciones WHERE id_curso = $1 AND id_inscripcion_estado = 1';
     const result = await pool.query(query, [idCurso]);
     return parseInt(result.rows[0].count);
