@@ -1,198 +1,269 @@
-# 🎓 SGA - Gestión de Cursos | Programación IV
+# 🎓 SGA - Sistema de Gestión Académica
 
-Trabajo Final Integrador (Primera Entrega) para la cátedra de Programación IV de la Licenciatura en Sistemas de la Facultad de Ciencias de la Administración - UNER.
+## Trabajo Final Integrador - Programación IV
 
-Aplicación web Full-Stack diseñada para la administración de un catálogo de cursos, implementando un ciclo de vida de datos completo (BREAD) y eliminación lógica (*Soft Delete*).
+Sistema desarrollado como Trabajo Final Integrador para la asignatura **Programación IV** de la **Licenciatura en Sistemas**, Facultad de Ciencias de la Administración, Universidad Nacional de Entre Ríos (UNER).
 
----
-
-# 🚀 Tecnologías Utilizadas
-
-## Frontend
-- HTML5
-- CSS3
-- JavaScript (Vanilla JS)
-- Bootstrap 5
-
-## Backend
-- Node.js
-- Express.js
-
-## Base de Datos
-- PostgreSQL
-- Driver `pg`
-
-## Seguridad
-- Encriptación de contraseñas (`crypto`)
-- Autenticación con JSON Web Tokens (`jsonwebtoken`)
+SGA (Sistema de Gestión Académica) es una aplicación web Full Stack destinada a la administración de cursos, estudiantes e inscripciones, implementando operaciones BREAD (Browse, Read, Edit, Add, Delete), control de reglas de negocio, autenticación mediante JWT y generación automática de diplomas en formato PDF.
 
 ---
 
-# 🛠️ Requisitos Previos
+## 🚀 Tecnologías Utilizadas
 
-Antes de ejecutar el proyecto, asegurarse de tener instalado:
+### Frontend
 
-- Node.js (v16 o superior)
-- PostgreSQL en ejecución local o remota
+* HTML5
+* CSS3
+* JavaScript (Vanilla JS)
+* Bootstrap 5
+* Bootstrap Icons
+* SweetAlert2
+
+### Backend
+
+* Node.js
+* Express.js
+* PostgreSQL
+* JSON Web Tokens (JWT)
+* bcrypt
+* Puppeteer
+* Handlebars
 
 ---
 
-# 📦 Instalación y Configuración
+## 🏗️ Arquitectura del Proyecto
 
-## 1. Clonar el repositorio
+El sistema se encuentra dividido en dos capas principales:
+
+### Frontend
+
+Responsable de la interfaz de usuario, interacción con el sistema y consumo de la API REST mediante peticiones HTTP asincrónicas.
+
+### Backend
+
+Responsable de la lógica de negocio, acceso a datos, validaciones, autenticación y generación de documentos PDF.
+
+La aplicación implementa una arquitectura por capas compuesta por:
+
+* Routes
+* Middlewares
+* Controllers
+* Repositories
+* Config
+
+Esta organización permite mantener una adecuada separación de responsabilidades y facilita el mantenimiento del sistema.
+
+---
+
+## ✨ Funcionalidades Implementadas
+
+### Autenticación
+
+* Inicio de sesión mediante JWT.
+* Protección de rutas privadas mediante middleware de autorización.
+* Persistencia de sesión utilizando Local Storage.
+
+### Gestión de Cursos
+
+* Alta de cursos.
+* Consulta de cursos.
+* Modificación de cursos.
+* Baja lógica de cursos.
+* Búsquedas dinámicas.
+* Paginación de resultados.
+* Generación masiva de diplomas.
+
+### Gestión de Estudiantes
+
+* Alta de estudiantes.
+* Consulta de estudiantes.
+* Modificación de estudiantes.
+* Baja lógica de estudiantes.
+* Búsquedas dinámicas.
+* Paginación de resultados.
+* Perfil individual del estudiante.
+
+### Gestión de Inscripciones
+
+* Registro de inscripciones.
+* Consulta de inscripciones.
+* Baja lógica de inscripciones.
+* Validación de cupos máximos.
+* Prevención de inscripciones duplicadas.
+
+### Generación de Diplomas
+
+* Emisión individual de certificados en formato PDF.
+* Generación automática a partir de los datos almacenados en la base de datos.
+* Renderizado dinámico utilizando Handlebars y Puppeteer.
+
+### Borrado Lógico (Soft Delete)
+
+Para preservar la integridad histórica de la información, el sistema no elimina registros físicamente de la base de datos. En su lugar, actualiza los estados correspondientes permitiendo conservar la trazabilidad de los datos.
+
+---
+
+## 📋 Requisitos Previos
+
+Antes de ejecutar el proyecto es necesario contar con:
+
+* Node.js v16 o superior.
+* PostgreSQL v13 o superior.
+* Git.
+* Visual Studio Code (recomendado).
+* Extensión Live Server (opcional).
+
+---
+
+## 📦 Instalación
+
+### 1. Clonar el repositorio
 
 ```bash
 git clone <url-del-repositorio>
+cd Trabajo-Integrador-Programacion-IV
 ```
 
----
+### 2. Configurar la Base de Datos
 
-## 2. Configuración de la Base de Datos
+1. Crear una base de datos PostgreSQL.
+2. Ejecutar el script SQL proporcionado por la cátedra para generar la estructura completa.
+3. Verificar que todas las tablas y secuencias hayan sido creadas correctamente.
 
-- La estructura y datos iniciales de la base fueron provistos por la cátedra como parte del enunciado del trabajo práctico, por lo que no se incluyen scripts SQL ni dumps dentro del repositorio.
 
----
 
-## 3. Configuración del Backend
+### 3. Instalar dependencias del Backend
 
-Navegar a la carpeta del servidor e instalar las dependencias:
+Ingresar a la carpeta backend:
 
 ```bash
 cd backend
 npm install
 ```
 
-Crear el archivo de entorno:
+### Generación de PDFs
+
+El sistema utiliza las siguientes librerías para la generación automática de diplomas:
 
 ```bash
-cp .env.example .env
+npm install puppeteer handlebars
 ```
 
-Editar el archivo `.env` con las credenciales correspondientes de PostgreSQL y la clave secreta de JWT.
+Estas dependencias ya se encuentran declaradas en el archivo `package.json`, por lo que normalmente serán instaladas automáticamente al ejecutar:
+
+```bash
+npm install
+```
+
+**Importante:** Puppeteer descarga una versión propia de Chromium durante la instalación. Este proceso puede tardar algunos minutos dependiendo de la velocidad de conexión.
 
 ---
 
-## 4. Ejecución del Backend
+## ⚙️ Configuración de Variables de Entorno
 
-Levantar el servidor de Express:
+Dentro de la carpeta `backend`, crear un archivo `.env` tomando como referencia el archivo `.env.example`.
+
+Ejemplo:
+
+```env
+PORT=3000
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=sga_db
+DB_USER=postgres
+DB_PASSWORD=password
+
+JWT_SECRET=clave_secreta_segura
+```
+
+---
+
+## ▶️ Ejecución del Proyecto
+
+### Backend
+
+Desde la carpeta backend:
 
 ```bash
 node index.js
 ```
 
-El servidor quedará ejecutándose en:
+Servidor disponible en:
 
 ```text
 http://localhost:3000
 ```
 
----
+### Frontend
 
-## 5. Lanzar el Frontend
-
-Abrir el archivo:
+Abrir el proyecto en Visual Studio Code y ejecutar:
 
 ```text
-frontend/index.html
+Open with Live Server
 ```
 
-en el navegador web.
+La aplicación quedará disponible en:
+
+```text
+http://127.0.0.1:5500
+```
 
 ---
 
-# 📂 Estructura de Carpetas
+## 📂 Estructura General del Proyecto
 
 ```text
 /
-├── frontend/              # Lado del Cliente (UI y lógica de presentación)
-│   ├── css/               # Hojas de estilo y personalizaciones
-│   ├── js/                # Scripts principales
-│   └── *.html             # Vistas de la aplicación
+├── frontend/                  # Lado del Cliente (Interfaz de Usuario)
+│   ├── css/                   # Estilos personalizados y Bootstrap
+│   ├── js/                    # Scripts de interacción y consumo de API (fetch)
+│   └── *.html                 # Vistas HTML5 del sistema
 │
-├── backend/               # Lado del Servidor (API REST)
-│   ├── src/               # Código fuente de la API
-│   │   ├── config/        # Configuración de conexión a la BD
-│   │   ├── controllers/   # Manejo de peticiones y respuestas (req, res)
-│   │   ├── repositories/  # Capa de acceso a datos (Consultas SQL)
-│   │   └── routes/        # Definición de endpoints
-│   ├── index.js           # Punto de entrada principal y middlewares
-│   ├── .env.example       # Variables de entorno de ejemplo
-│   └── package.json       # Dependencias y scripts
+├── backend/                   # Lado del Servidor (API RESTful)
+│   ├── src/                   # Código fuente de la aplicación
+│   │   ├── config/            # Pool de conexiones a PostgreSQL (db.js)
+│   │   ├── controllers/       # Controladores de lógica de negocio y renders de PDFs
+│   │   ├── middlewares/       # Validadores de datos y esquemas de verificación JWT
+│   │   ├── repositories/      # Capa de datos puramente SQL (Consultas parametrizadas)
+│   │   └── routes/            # Enrutadores y mapeo de verbos HTTP (.routes.js)
+│   │
+│   ├── index.js               # Punto de entrada principal y middlewares globales
+│   ├── .env.example           # Guía estructurada de variables de entorno
+│   └── package.json           # Dependencias y scripts de automatización NPM
 │
-├── .gitignore             # Archivos ignorados por Git
-└── README.md              # Documentación del proyecto
+├── .gitignore                 # Definición de exclusión de archivos para Git
+└── README.md                  # Documentación técnica del proyecto
 ```
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🔐 Seguridad
 
-El diseño del lado del servidor se fundamenta en el principio de **Separación de Responsabilidades (Separation of Concerns)**. Se abandonó el enfoque monolítico inicial para adoptar una estructura modular en capas, lo que permite escalar el sistema hacia futuros módulos (Estudiantes, Inscripciones) de forma segura.
+La aplicación implementa:
 
-La topología del backend se compone de:
-* 🔀 **Routes:** Definen las URLs y derivan el tráfico.
-* 🧠 **Controllers:** Manejan las validaciones y las respuestas al cliente.
-* 💾 **Repositories:** Contienen de forma exclusiva las consultas SQL a PostgreSQL.
-* ⚙️ **Config:** Administra la conexión a la base de datos y credenciales de forma segura.
-
-
-
-
-
-# Sistema de Gestión Académica (SGA) - UNER 🎓
-
-Proyecto desarrollado como Trabajo Final Integrador para la cátedra de **Programación IV (2026)** de la Licenciatura en Sistemas en la **Facultad de Ciencias de la Administración - UNER**.
-
-Este sistema es una aplicación web responsiva diseñada para gestionar estudiantes, cursos e inscripciones mediante una arquitectura RESTful, aplicando estrictos estándares de seguridad y experiencia de usuario.
-
-## 🚀 Tecnologías y Arquitectura
-
-El proyecto está dividido en dos capas claramente separadas (Frontend y Backend) para asegurar la escalabilidad:
-
-### **Frontend**
-* **HTML5 & CSS3:** Semántica y estilos personalizados (`styless.css`).
-* **JavaScript (Vanilla):** Lógica asíncrona (`fetch` API), delegación de eventos y *Live Search* (Debounce).
-* **Bootstrap 5 & Bootstrap Icons:** Framework CSS para diseño responsivo y maquetación (Flexbox/Grid).
-* **SweetAlert2:** Para la estandarización de modales y alertas del sistema.
-
-### **Backend**
-* **Node.js & Express.js:** Servidor y enrutamiento de la API REST.
-* **PostgreSQL (pg):** Motor de base de datos relacional.
-* **Bcrypt / JSON Web Tokens (JWT):** Para encriptación de contraseñas y autenticación por sesión segura (Vigilante de rutas).
-* **Puppeteer:** Utilizado para la generación dinámica de Diplomas/Certificados en formato PDF.
-* **Dotenv:** Para la gestión segura de información sensible mediante variables de entorno.
+* Autenticación mediante JWT.
+* Validación de tokens en rutas protegidas.
+* Consultas SQL parametrizadas.
+* Separación de responsabilidades mediante arquitectura por capas.
+* CORS y helmet
 
 ---
 
-## ✨ Características Principales
+## 👨‍💻 Autores
 
-Cumpliendo con los requerimientos funcionales de la cátedra, el sistema incluye:
+Trabajo desarrollado por:
 
-1. **Autenticación Segura:** Login protegido. El token JWT se almacena y se envía en los *headers* (`Authorization: Bearer <token>`) en cada petición HTTP al backend.
-2. **Soft Deletes (Borrados Lógicos):** No se realizan `DELETE` físicos en la base de datos. Se actualizan los campos de estado (`id_curso_estado`, `activo`) para mantener la integridad referencial.
-3. **BREAD Completo:** Operaciones de *Browse, Read, Edit, Add, Delete* en los módulos principales.
-4. **Buscador en Tiempo Real (Live Search):** Implementación de funciones *Debounce* en el frontend para filtrar registros de la base de datos de manera instantánea y eficiente sin recargar la página.
-5. **Paginación Dinámica:** Tanto en backend (mediante `LIMIT` y `OFFSET`) como en frontend para optimizar la carga de datos.
-6. **Generación de Diplomas:** Exportación nativa a PDF de los certificados de los alumnos.
+Maidana Ulises
+Pacharoni Tomás 
+Epifania Ríos
+Pablo Ruiz Díaz
+Lucas Sánchez
 
----
 
-## ⚙️ Instalación y Configuración
 
-Siga estos pasos para desplegar el proyecto en un entorno local:
+Licenciatura en Sistemas
+Facultad de Ciencias de la Administración
+Universidad Nacional de Entre Ríos (UNER)
 
-### 1. Base de Datos
-1. Crear una base de datos en PostgreSQL.
-2. Ejecutar el script SQL incluido en la carpeta `database` (o en la raíz) para generar las tablas (`usuarios`, `estudiantes`, `cursos`, `inscripciones`, etc.) y sus relaciones.
-   * *Nota Técnica:* Si se insertan registros de prueba manualmente vía SQL, se recomienda sincronizar las secuencias de las llaves primarias usando: `SELECT setval(pg_get_serial_sequence('nombre_tabla', 'id_columna'), (SELECT MAX(id_columna) FROM nombre_tabla));`
-
-### 2. Variables de Entorno (Backend)
-En la carpeta `/backend`, crear un archivo llamado `.env` basándose en el `.env.example` (si existe), o configurar las siguientes variables:
-```env
-PORT=3000
-DB_USER=tu_usuario_postgres
-DB_PASSWORD=tu_password
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=nombre_de_tu_bd
-JWT_SECRET=tu_clave_secreta_super_segura
+Programación IV - Trabajo Final Integrador
